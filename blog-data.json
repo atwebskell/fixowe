@@ -1,0 +1,46 @@
+{
+  "posts": [
+    {
+      "id": 1,
+      "title": "5 Tips to Maintain Your AC for Longer Life",
+      "body": "Regular maintenance is key to ensuring your AC runs efficiently and lasts longer. Here are 5 essential tips to keep your AC in top condition:\n\n1. Clean or replace filters regularly: Clogged filters restrict airflow and reduce efficiency.\n2. Keep the coils clean: Dirty coils reduce the system's ability to absorb heat.\n3. Check the condensate drain: A clogged drain can cause water damage and affect humidity levels.\n4. Inspect the fins: Bent fins can block airflow through the coil.\n5. Schedule professional maintenance: A professional tune-up ensures all components are working correctly.\n\nBy following these simple steps, you can extend the life of your AC and save on energy bills.",
+      "tags": ["Tips & Tricks", "AC Repair"],
+      "reactions": { "likes": 120 }
+    },
+    {
+      "id": 2,
+      "title": "Why Regular Maintenance Saves You Money",
+      "body": "Skipping maintenance might seem like a good way to save money, but it actually costs you more in the long run. \n\nWithout regular tune-ups, your appliances work harder to cool or clean, which uses more electricity and drives up your utility bills. Additionally, small issues that could have been fixed cheaply during a routine check can turn into major, expensive breakdowns.\n\nInvesting in an Annual Maintenance Contract (AMC) is the smartest way to keep your home running smoothly without unexpected repair costs.",
+      "tags": ["Maintenance", "Savings"],
+      "reactions": { "likes": 85 }
+    },
+    {
+      "id": 3,
+      "title": "Signs Your Refrigerator Needs Immediate Repair",
+      "body": "Your refrigerator works 24/7, making it one of the most critical appliances in your home. If it breaks down, you risk losing hundreds of dollars in groceries.\n\nLook out for these warning signs:\n\n- Excessive condensation inside the fridge.\n- The motor is running constantly and loudly.\n- The back of the fridge is hot to the touch.\n- Your food is spoiling faster than usual.\n\nIf you notice any of these issues, don't wait. Call a professional technician immediately to diagnose and fix the problem before it's too late.",
+      "tags": ["Appliances", "Warning Signs"],
+      "reactions": { "likes": 204 }
+    },
+    {
+      "id": 4,
+      "title": "The Importance of AMC Plans for Commercial Cold Storage",
+      "body": "For businesses that rely on cold storage, a breakdown is not just an inconvenience—it's a financial disaster. \n\nCommercial refrigeration systems are complex and require specialized care. An AMC (Annual Maintenance Contract) guarantees that certified technicians regularly inspect your compressors, check refrigerant levels, and ensure that temperature controls are perfectly calibrated.\n\nThis proactive approach minimizes downtime, ensures compliance with food safety regulations, and protects your valuable inventory.",
+      "tags": ["Commercial", "Cold Storage"],
+      "reactions": { "likes": 42 }
+    },
+    {
+      "id": 5,
+      "title": "Common Washing Machine Problems and How to Prevent Them",
+      "body": "Washing machines handle a lot of wear and tear. The most common issues we see include the machine not draining properly, excessive vibration, and foul odors.\n\nTo prevent these issues:\n- Never overload the machine.\n- Clean the lint filter after every few washes.\n- Leave the door slightly open after a cycle to prevent mold.\n- Check pockets for loose change or keys before washing.\n\nSimple habits can prevent the need for expensive repairs and keep your clothes smelling fresh.",
+      "tags": ["Tips & Tricks", "Washing Machine"],
+      "reactions": { "likes": 315 }
+    },
+    {
+      "id": 6,
+      "title": "When to Repair vs. Replace Your HVAC System",
+      "body": "It's the ultimate homeowner dilemma: should you keep fixing an old AC unit, or is it time to buy a new one?\n\nA good rule of thumb is the $5,000 rule. Multiply the age of the equipment by the estimated cost of repair. If the total is over $5,000, you should replace it. For example, if your 10-year-old AC needs a $600 repair (10 x $600 = $6,000), a replacement makes more financial sense.\n\nAlso, consider efficiency. Modern systems use significantly less power, meaning a new unit could pay for itself over time through lower electricity bills.",
+      "tags": ["HVAC", "Guides"],
+      "reactions": { "likes": 78 }
+    }
+  ]
+}
