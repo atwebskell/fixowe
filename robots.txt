@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://www.fixowe.com/sitemap.xml
+Sitemap: https://fixowe.com/sitemap.xml
