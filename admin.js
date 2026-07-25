@@ -31,8 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let failedLoginAttempts = 0;
   let lockoutUntil = 0;
 
-  const MASTER_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // SHA-256 of "1234"
-  const ALT_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
+  // Secure SHA-256 Default Passcode: "fixowe@2026"
+  const DEFAULT_STRONG_HASH = "a937a0bc7c77c980249216ff634f183ef07cb7f7970d4c82e6df5b91b97a213e";
 
   // Application Data
   let bookingsData = [
@@ -110,15 +110,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const inputHash = await sha256(pin);
     const customHash = localStorage.getItem('fixowe_custom_admin_hash');
+    const validHash = customHash || DEFAULT_STRONG_HASH;
+
     if ((email === 'admin@fixowe.com' || email === '6235780788' || email === 'admin') && 
-        (inputHash === MASTER_HASH || inputHash === ALT_HASH || (customHash && inputHash === customHash) || pin === '1234' || pin === 'fixowe2026')) {
+        (inputHash === validHash)) {
       failedLoginAttempts = 0;
       return true;
     } else {
       failedLoginAttempts++;
       if (failedLoginAttempts >= 3) {
         lockoutUntil = Date.now() + (15 * 60 * 1000);
-        throw new Error("Security Alert: System locked for 15 minutes.");
+        throw new Error("Security Alert: System locked for 15 minutes due to failed login attempts.");
       }
       throw new Error(`Invalid credentials (${failedLoginAttempts}/3 attempts).`);
     }
@@ -516,9 +518,9 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const curHash = await sha256(currentPin);
         const storedCustom = localStorage.getItem('fixowe_custom_admin_hash');
-        const isValidCur = (curHash === MASTER_HASH || curHash === ALT_HASH || (storedCustom && curHash === storedCustom) || currentPin === '1234' || currentPin === 'fixowe2026');
+        const validHash = storedCustom || DEFAULT_STRONG_HASH;
 
-        if (!isValidCur) {
+        if (curHash !== validHash) {
           secStatusMsg.style.color = "var(--red)";
           secStatusMsg.textContent = "Current passcode is incorrect!";
           secStatusMsg.style.display = "block";
