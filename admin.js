@@ -241,10 +241,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ${b.note ? `<div class="note-container">"${escapeHtml(b.note)}"</div>` : ''}
 
-        <select class="select-tech" onchange="assignTechnician('${b.id}', this.value)">
-          <option value="Unassigned">Assign Technician...</option>
-          ${techOptionsHtml}
-        </select>
+        <div style="display:flex; gap:8px;">
+          <select class="select-tech" style="flex:1;" onchange="updateBookingStatus('${b.id}', this.value)">
+            <option value="NEW" ${b.status === 'NEW' ? 'selected' : ''}>Status: NEW</option>
+            <option value="IN PROGRESS" ${b.status === 'IN PROGRESS' ? 'selected' : ''}>Status: IN PROGRESS</option>
+            <option value="COMPLETED" ${b.status === 'COMPLETED' ? 'selected' : ''}>Status: COMPLETED</option>
+          </select>
+
+          <select class="select-tech" style="flex:1;" onchange="assignTechnician('${b.id}', this.value)">
+            <option value="Unassigned">Assign Tech...</option>
+            ${techOptionsHtml}
+          </select>
+        </div>
 
         <div class="action-row">
           <a class="btn-act btn-act-main" href="https://api.whatsapp.com/send?phone=${b.phone.replace(/[^0-9]/g, '')}" target="_blank">WhatsApp</a>
@@ -280,11 +288,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  window.updateBookingStatus = function(id, newStatus) {
+    const booking = bookingsData.find(b => b.id === id);
+    if (booking) {
+      booking.status = newStatus;
+      if (typeof db !== 'undefined' && db) {
+        db.collection("bookings").doc(id).update({ status: newStatus }).catch(() => {});
+      }
+      renderBookings();
+    }
+  };
+
   window.toggleBookingStatus = function(id) {
     const booking = bookingsData.find(b => b.id === id);
     if (booking) {
-      booking.status = booking.status === 'NEW' ? 'IN PROGRESS' : (booking.status === 'IN PROGRESS' ? 'COMPLETED' : 'NEW');
-      renderBookings();
+      const nextStatus = booking.status === 'NEW' ? 'IN PROGRESS' : (booking.status === 'IN PROGRESS' ? 'COMPLETED' : 'NEW');
+      updateBookingStatus(id, nextStatus);
     }
   };
 
