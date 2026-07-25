@@ -319,18 +319,71 @@ document.addEventListener('DOMContentLoaded', () => {
     modalPhotoViewer.classList.add('active');
   };
 
+  let currentActiveInvoiceBooking = null;
+
+  window.recalculateInvoiceTotal = function() {
+    const labor = parseFloat(document.getElementById('inv-labor-cost').value) || 0;
+    const parts = parseFloat(document.getElementById('inv-parts-cost').value) || 0;
+    const subtotal = labor + parts;
+    const gst = Math.round(subtotal * 0.18);
+    const grandTotal = subtotal + gst;
+
+    document.getElementById('inv-subtotal').textContent = `₹${subtotal.toLocaleString('en-IN')}`;
+    document.getElementById('inv-gst').textContent = `₹${gst.toLocaleString('en-IN')}`;
+    document.getElementById('inv-grand-total').textContent = `₹${grandTotal.toLocaleString('en-IN')}`;
+  };
+
   window.generateInvoice = function(id) {
     const b = bookingsData.find(item => item.id === id);
     if (b) {
-      const cleanPhone = b.phone.replace(/[^0-9]/g, '');
-      let invMsg = `*FIXOWE OFFICIAL SERVICE INVOICE*%0A%0A`;
-      invMsg += `*Customer:* ${encodeURIComponent(b.name)}%0A`;
-      invMsg += `*Service:* ${encodeURIComponent(b.service)}%0A`;
-      invMsg += `*Estimated Amount:* ${encodeURIComponent(b.estimatedCost)}%0A%0A`;
-      invMsg += `Thank you for choosing Fixowe Service Network!%0AHelpline: +916235780788`;
-      window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${invMsg}`, '_blank');
+      currentActiveInvoiceBooking = b;
+      document.getElementById('inv-num').textContent = `INV-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      document.getElementById('inv-date').textContent = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      document.getElementById('inv-client-name').textContent = b.name;
+      document.getElementById('inv-client-phone').textContent = b.phone;
+      document.getElementById('inv-client-loc').textContent = b.location;
+      document.getElementById('inv-tech-assigned').textContent = `Tech: ${b.technician}`;
+      document.getElementById('inv-item-desc').textContent = `${b.service} (Labor & Inspection)`;
+
+      // Set initial base amount from estimated cost
+      const rawCost = parseInt((b.estimatedCost || "1200").replace(/[^0-9]/g, '')) || 1200;
+      document.getElementById('inv-labor-cost').value = rawCost;
+      document.getElementById('inv-parts-cost').value = 300;
+
+      recalculateInvoiceTotal();
+      document.getElementById('modal-invoice').classList.add('active');
     }
   };
+
+  const btnSendWaInv = document.getElementById('btn-send-wa-inv');
+  if (btnSendWaInv) {
+    btnSendWaInv.addEventListener('click', () => {
+      if (currentActiveInvoiceBooking) {
+        const b = currentActiveInvoiceBooking;
+        const labor = document.getElementById('inv-labor-cost').value;
+        const parts = document.getElementById('inv-parts-cost').value;
+        const subtotal = document.getElementById('inv-subtotal').textContent;
+        const gst = document.getElementById('inv-gst').textContent;
+        const grandTotal = document.getElementById('inv-grand-total').textContent;
+
+        const cleanPhone = b.phone.replace(/[^0-9]/g, '');
+        let invMsg = `*FIXOWE OFFICIAL TAX INVOICE*%0A`;
+        invMsg += `*Invoice No:* INV-2026-0842%0A`;
+        invMsg += `*Customer:* ${encodeURIComponent(b.name)}%0A`;
+        invMsg += `*Service:* ${encodeURIComponent(b.service)}%0A`;
+        invMsg += `-----------------------------------%0A`;
+        invMsg += `• Labor Charge: ₹${labor}%0A`;
+        invMsg += `• Spare Parts: ₹${parts}%0A`;
+        invMsg += `• Subtotal: ${subtotal}%0A`;
+        invMsg += `• GST (18%): ${gst}%0A`;
+        invMsg += `*GRAND TOTAL: ${grandTotal}*%0A`;
+        invMsg += `-----------------------------------%0A`;
+        invMsg += `Thank you for choosing Fixowe Service Network!%0AHelpline: +91 62357 80788`;
+
+        window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${invMsg}`, '_blank');
+      }
+    });
+  }
 
   fabCreateLead.addEventListener('click', () => modalAddLead.classList.add('active'));
   btnOpenAddTech.addEventListener('click', () => modalAddTech.classList.add('active'));
