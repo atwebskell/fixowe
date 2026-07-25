@@ -405,11 +405,35 @@ document.addEventListener('DOMContentLoaded', () => {
   fabCreateLead.addEventListener('click', () => modalAddLead.classList.add('active'));
   btnOpenAddTech.addEventListener('click', () => modalAddTech.classList.add('active'));
 
-  document.querySelectorAll('.modal-close').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const modalId = btn.getAttribute('data-close');
-      document.getElementById(modalId).classList.remove('active');
-    });
+  // UNIVERSAL BULLETPROOF MODAL CLOSING LOGIC
+  window.closeAllModals = function() {
+    document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
+  };
+
+  // 1. Global Event Delegation for all [data-close] buttons & elements
+  document.addEventListener('click', (e) => {
+    const closeBtn = e.target.closest('[data-close]');
+    if (closeBtn) {
+      const targetId = closeBtn.getAttribute('data-close');
+      if (targetId) {
+        const targetModal = document.getElementById(targetId);
+        if (targetModal) targetModal.classList.remove('active');
+      } else {
+        closeAllModals();
+      }
+    }
+    
+    // 2. Backdrop Click to Close (clicking background overlay)
+    if (e.target.classList.contains('modal-backdrop')) {
+      e.target.classList.remove('active');
+    }
+  });
+
+  // 3. Escape Key Listener
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAllModals();
+    }
   });
 
   formCreateLead.addEventListener('submit', (e) => {
