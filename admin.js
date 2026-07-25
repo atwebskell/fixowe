@@ -324,10 +324,16 @@ document.addEventListener('DOMContentLoaded', () => {
   window.recalculateInvoiceTotal = function() {
     const labor = parseFloat(document.getElementById('inv-labor-cost').value) || 0;
     const parts = parseFloat(document.getElementById('inv-parts-cost').value) || 0;
-    const subtotal = labor + parts;
-    const gst = Math.round(subtotal * 0.18);
+    const visit = parseFloat(document.getElementById('inv-visit-cost').value) || 0;
+    const discount = parseFloat(document.getElementById('inv-discount-cost').value) || 0;
+    const gstRate = parseFloat(document.getElementById('inv-gst-rate').value) || 0;
+
+    const grossSubtotal = labor + parts + visit;
+    const subtotal = Math.max(0, grossSubtotal - discount);
+    const gst = Math.round(subtotal * (gstRate / 100));
     const grandTotal = subtotal + gst;
 
+    document.getElementById('inv-gst-label').textContent = `GST (${gstRate}%):`;
     document.getElementById('inv-subtotal').textContent = `₹${subtotal.toLocaleString('en-IN')}`;
     document.getElementById('inv-gst').textContent = `₹${gst.toLocaleString('en-IN')}`;
     document.getElementById('inv-grand-total').textContent = `₹${grandTotal.toLocaleString('en-IN')}`;
@@ -343,12 +349,13 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('inv-client-phone').textContent = b.phone;
       document.getElementById('inv-client-loc').textContent = b.location;
       document.getElementById('inv-tech-assigned').textContent = `Tech: ${b.technician}`;
-      document.getElementById('inv-item-desc').textContent = `${b.service} (Labor & Inspection)`;
+      document.getElementById('inv-labor-desc').value = `${b.service} Labor`;
 
-      // Set initial base amount from estimated cost
       const rawCost = parseInt((b.estimatedCost || "1200").replace(/[^0-9]/g, '')) || 1200;
       document.getElementById('inv-labor-cost').value = rawCost;
       document.getElementById('inv-parts-cost').value = 300;
+      document.getElementById('inv-visit-cost').value = 0;
+      document.getElementById('inv-discount-cost').value = 0;
 
       recalculateInvoiceTotal();
       document.getElementById('modal-invoice').classList.add('active');
@@ -360,24 +367,34 @@ document.addEventListener('DOMContentLoaded', () => {
     btnSendWaInv.addEventListener('click', () => {
       if (currentActiveInvoiceBooking) {
         const b = currentActiveInvoiceBooking;
+        const laborDesc = document.getElementById('inv-labor-desc').value;
         const labor = document.getElementById('inv-labor-cost').value;
+        const partsDesc = document.getElementById('inv-parts-desc').value;
         const parts = document.getElementById('inv-parts-cost').value;
+        const visit = document.getElementById('inv-visit-cost').value;
+        const discount = document.getElementById('inv-discount-cost').value;
+        const gstRate = document.getElementById('inv-gst-rate').value;
         const subtotal = document.getElementById('inv-subtotal').textContent;
         const gst = document.getElementById('inv-gst').textContent;
         const grandTotal = document.getElementById('inv-grand-total').textContent;
+        const status = document.getElementById('inv-payment-status').value;
+        const notes = document.getElementById('inv-notes').value;
 
         const cleanPhone = b.phone.replace(/[^0-9]/g, '');
         let invMsg = `*FIXOWE OFFICIAL TAX INVOICE*%0A`;
         invMsg += `*Invoice No:* INV-2026-0842%0A`;
         invMsg += `*Customer:* ${encodeURIComponent(b.name)}%0A`;
-        invMsg += `*Service:* ${encodeURIComponent(b.service)}%0A`;
+        invMsg += `*Payment Status:* *${status}*%0A`;
         invMsg += `-----------------------------------%0A`;
-        invMsg += `• Labor Charge: ₹${labor}%0A`;
-        invMsg += `• Spare Parts: ₹${parts}%0A`;
+        invMsg += `• ${encodeURIComponent(laborDesc)}: ₹${labor}%0A`;
+        if (parseFloat(parts) > 0) invMsg += `• ${encodeURIComponent(partsDesc)}: ₹${parts}%0A`;
+        if (parseFloat(visit) > 0) invMsg += `• Visiting / Inspection Fee: ₹${visit}%0A`;
+        if (parseFloat(discount) > 0) invMsg += `• Discount: -₹${discount}%0A`;
         invMsg += `• Subtotal: ${subtotal}%0A`;
-        invMsg += `• GST (18%): ${gst}%0A`;
+        invMsg += `• GST (${gstRate}%): ${gst}%0A`;
         invMsg += `*GRAND TOTAL: ${grandTotal}*%0A`;
         invMsg += `-----------------------------------%0A`;
+        if (notes) invMsg += `_Note: ${encodeURIComponent(notes)}_%0A%0A`;
         invMsg += `Thank you for choosing Fixowe Service Network!%0AHelpline: +91 62357 80788`;
 
         window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${invMsg}`, '_blank');
