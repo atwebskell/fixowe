@@ -350,6 +350,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const booking = bookingsData.find(b => b.id === id);
     if (booking) {
       booking.technician = techValue;
+      if (typeof db !== 'undefined' && db) {
+        db.collection("bookings").doc(id).update({ technician: techValue }).catch(() => {});
+      }
     }
   };
 
@@ -514,8 +517,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const service = document.getElementById('lead-service').value.trim();
     const note = document.getElementById('lead-note').value.trim();
 
+    const docId = "manual_" + Date.now();
     const newLead = {
-      id: "manual_" + Date.now(),
+      id: docId,
       name, phone, service, note,
       location: "Manjeri, Kerala",
       time: "Just Now",
@@ -527,6 +531,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bookingsData.unshift(newLead);
     renderBookings();
+
+    if (typeof db !== 'undefined' && db) {
+      db.collection("bookings").doc(docId).set({
+        name, phone, service, note, status: "NEW", timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).catch(err => console.log("Firestore lead error:", err));
+    }
+
     modalAddLead.classList.remove('active');
     formCreateLead.reset();
   });
@@ -537,8 +548,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const role = document.getElementById('tech-role').value.trim();
     const phone = document.getElementById('tech-phone').value.trim();
 
+    const techId = "t_" + Date.now();
     const newTech = {
-      id: "t_" + Date.now(),
+      id: techId,
       name, role, phone,
       status: "AVAILABLE",
       activeJobs: 0
@@ -547,6 +559,13 @@ document.addEventListener('DOMContentLoaded', () => {
     techniciansData.push(newTech);
     renderTechnicians();
     renderBookings();
+
+    if (typeof db !== 'undefined' && db) {
+      db.collection("technicians").doc(techId).set({
+        name, role, phone, status: "AVAILABLE", activeJobs: 0
+      }).catch(err => console.log("Firestore tech error:", err));
+    }
+
     modalAddTech.classList.remove('active');
     formCreateTech.reset();
   });
