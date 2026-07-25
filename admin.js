@@ -70,12 +70,12 @@ document.addEventListener('DOMContentLoaded', () => {
       phone: "+919745369331",
       service: "Washing Machine Repair",
       note: "Heavy vibration during high-speed spin cycle.",
-      location = "Pandikkad Road, Manjeri",
-      time = "Yesterday, 4:15 PM",
-      status = "COMPLETED",
+      location: "Pandikkad Road, Manjeri",
+      time: "Yesterday, 4:15 PM",
+      status: "COMPLETED",
       photoUrl: "https://www.fixowe.com/assets/service_wash.png",
-      technician = "Ramesh K. (Appliance)",
-      estimatedCost = "₹950"
+      technician: "Ramesh K. (Appliance)",
+      estimatedCost: "₹950"
     }
   ];
 
