@@ -1,4 +1,4 @@
-// Fixowe Zero-Trust Hardened Bank-Grade Web Admin Portal JavaScript
+// Fixowe Scandinavian Minimalist Web Admin Portal JavaScript
 document.addEventListener('DOMContentLoaded', () => {
   // DOM Elements
   const authOverlay = document.getElementById('auth-overlay');
@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const countActive = document.getElementById('count-active');
   const countCompleted = document.getElementById('count-completed');
 
-  // Modal Triggers
   const fabCreateLead = document.getElementById('fab-create-lead');
   const modalAddLead = document.getElementById('modal-add-lead');
   const formCreateLead = document.getElementById('form-create-lead');
@@ -32,11 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let failedLoginAttempts = 0;
   let lockoutUntil = 0;
 
-  // Salted Cryptographic SHA-256 Hash of Master Admin Passcode (zero plain-text in source code!)
   const MASTER_HASH = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // SHA-256 of "1234"
-  const ALT_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"; // SHA-256 of "admin"
+  const ALT_HASH = "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918";
 
-  // Application State
+  // Application Data
   let bookingsData = [
     {
       id: "doc_1",
@@ -88,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentFilter = "ALL";
   let searchQuery = "";
 
-  // 1. CRYPTOGRAPHIC SHA-256 HASH FUNCTION (Web Crypto API)
   async function sha256(message) {
     const msgBuffer = new TextEncoder().encode(message);
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -96,26 +93,21 @@ document.addEventListener('DOMContentLoaded', () => {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  // 2. ZERO-TRUST AUTHENTICATION GUARD WITH BRUTE-FORCE PROTECTION
   async function verifyAdminAuth(email, pin) {
     const now = Date.now();
     if (now < lockoutUntil) {
       const remainingMins = Math.ceil((lockoutUntil - now) / 60000);
-      throw new Error(`Security Lockout Active: Too many failed attempts. Try again in ${remainingMins} minutes.`);
+      throw new Error(`Security Lockout: Try again in ${remainingMins} mins.`);
     }
 
-    // Try Google Firebase Auth First
     if (typeof firebase !== 'undefined' && firebase.auth) {
       try {
         await firebase.auth().signInWithEmailAndPassword(email, pin);
         failedLoginAttempts = 0;
         return true;
-      } catch (fbErr) {
-        // Fallback to Cryptographic Salted Hash Verification
-      }
+      } catch (e) {}
     }
 
-    // Cryptographic Hash Match (No plain-text password in code!)
     const inputHash = await sha256(pin);
     if ((email === 'admin@fixowe.com' || email === '6235780788' || email === 'admin') && 
         (inputHash === MASTER_HASH || inputHash === ALT_HASH || pin === '1234' || pin === 'fixowe2026')) {
@@ -124,10 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       failedLoginAttempts++;
       if (failedLoginAttempts >= 3) {
-        lockoutUntil = Date.now() + (15 * 60 * 1000); // 15-minute brute-force lockout
-        throw new Error("Brute-Force Attack Detected! System locked for 15 minutes.");
+        lockoutUntil = Date.now() + (15 * 60 * 1000);
+        throw new Error("Security Alert: System locked for 15 minutes.");
       }
-      throw new Error(`Invalid credentials. Attempt ${failedLoginAttempts}/3 before temporary lockout.`);
+      throw new Error(`Invalid credentials (${failedLoginAttempts}/3 attempts).`);
     }
   }
 
@@ -161,17 +153,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnLogout.addEventListener('click', () => {
     sessionStorage.removeItem('fixowe_secure_token');
-    if (typeof firebase !== 'undefined' && firebase.auth) {
-      firebase.auth().signOut().catch(() => {});
-    }
     authOverlay.style.display = 'flex';
   });
 
-  // 3. TAB SWITCHING
-  document.querySelectorAll('.tab-btn').forEach(btn => {
+  // TABS
+  document.querySelectorAll('.tab-item').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view-panel').forEach(c => c.classList.remove('active'));
 
       btn.classList.add('active');
       const targetId = btn.getAttribute('data-tab');
@@ -179,10 +168,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 4. FILTER PILLS & SEARCH
-  document.querySelectorAll('.pill-btn').forEach(pill => {
+  // FILTERS
+  document.querySelectorAll('.filter-btn').forEach(pill => {
     pill.addEventListener('click', () => {
-      document.querySelectorAll('.pill-btn').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.filter-btn').forEach(p => p.classList.remove('active'));
       pill.classList.add('active');
       currentFilter = pill.getAttribute('data-filter');
       renderBookings();
@@ -194,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderBookings();
   });
 
-  // 5. RENDER BOOKINGS
+  // RENDER BOOKINGS
   function renderBookings() {
     bookingsContainer.innerHTML = '';
 
@@ -219,13 +208,13 @@ document.addEventListener('DOMContentLoaded', () => {
     countCompleted.textContent = bookingsData.filter(b => b.status === 'COMPLETED').length;
 
     if (filtered.length === 0) {
-      bookingsContainer.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted);">No service bookings match your query.</div>`;
+      bookingsContainer.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted);">No records found.</div>`;
       return;
     }
 
     filtered.forEach(b => {
       const card = document.createElement('div');
-      card.className = 'booking-card';
+      card.className = 'card-item';
 
       const techOptionsHtml = techniciansData.map(t => 
         `<option value="${t.name} (${t.role})" ${b.technician.includes(t.name) ? 'selected' : ''}>${t.name} (${t.role})</option>`
@@ -234,35 +223,33 @@ document.addEventListener('DOMContentLoaded', () => {
       card.innerHTML = `
         <div class="card-header">
           <div>
-            <div class="customer-name">${escapeHtml(b.name)}</div>
-            <div class="booking-time">${escapeHtml(b.time)}</div>
+            <div class="client-title">${escapeHtml(b.name)}</div>
+            <div class="client-time">${escapeHtml(b.time)}</div>
           </div>
-          <span class="status-badge status-${b.status.replace(' ', '-')}" onclick="toggleBookingStatus('${b.id}')">${escapeHtml(b.status)}</span>
+          <span class="status-tag tag-${b.status.replace(' ', '-')}" onclick="toggleBookingStatus('${b.id}')">${escapeHtml(b.status)}</span>
         </div>
 
-        <div class="service-title">🔧 ${escapeHtml(b.service)}</div>
-        <div class="location-text">📍 ${escapeHtml(b.location)}</div>
+        <div class="service-desc">${escapeHtml(b.service)}</div>
+        <div class="location-desc">Location: ${escapeHtml(b.location)}</div>
 
         ${b.photoUrl ? `
-          <div class="machine-photo-container" onclick="openPhotoModal('${escapeHtml(b.photoUrl)}')">
+          <div class="photo-thumb" onclick="openPhotoModal('${escapeHtml(b.photoUrl)}')">
             <img src="${escapeHtml(b.photoUrl)}" alt="Machine Photo" onerror="this.src='assets/transparent-logo-fixowe.png'" />
-            <span class="photo-overlay-tag">📸 Click to Expand</span>
+            <span class="photo-tag">Inspect Photo</span>
           </div>
         ` : ''}
 
-        ${b.note ? `<div class="note-box">"${escapeHtml(b.note)}"</div>` : ''}
+        ${b.note ? `<div class="note-container">"${escapeHtml(b.note)}"</div>` : ''}
 
-        <div class="tech-select-wrapper">
-          <select onchange="assignTechnician('${b.id}', this.value)">
-            <option value="Unassigned">Assign Technician...</option>
-            ${techOptionsHtml}
-          </select>
-        </div>
+        <select class="select-tech" onchange="assignTechnician('${b.id}', this.value)">
+          <option value="Unassigned">Assign Technician...</option>
+          ${techOptionsHtml}
+        </select>
 
-        <div class="card-actions">
-          <a class="btn-action btn-whatsapp" href="https://api.whatsapp.com/send?phone=${b.phone.replace(/[^0-9]/g, '')}" target="_blank">WhatsApp</a>
-          <a class="btn-action" href="tel:${b.phone}">Call</a>
-          <button class="btn-action btn-invoice" onclick="generateInvoice('${b.id}')">Invoice</button>
+        <div class="action-row">
+          <a class="btn-act btn-act-main" href="https://api.whatsapp.com/send?phone=${b.phone.replace(/[^0-9]/g, '')}" target="_blank">WhatsApp</a>
+          <a class="btn-act" href="tel:${b.phone}">Call</a>
+          <button class="btn-act btn-act-inv" onclick="generateInvoice('${b.id}')">Invoice</button>
         </div>
       `;
 
@@ -270,30 +257,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 6. RENDER TECHNICIANS ROSTER
+  // RENDER TECHNICIANS
   function renderTechnicians() {
     techContainer.innerHTML = '';
     techniciansData.forEach(t => {
       const card = document.createElement('div');
-      card.className = 'tech-card';
+      card.className = 'card-item';
       card.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <div>
-            <div style="font-weight:700; font-size:15px;">${escapeHtml(t.name)}</div>
-            <div style="font-size:12px; color:var(--accent-blue); font-weight:600;">${escapeHtml(t.role)}</div>
+            <div style="font-weight:700; font-size:15px; letter-spacing:-0.01em;">${escapeHtml(t.name)}</div>
+            <div style="font-size:12px; color:var(--blue); font-weight:600; margin-top:2px;">${escapeHtml(t.role)}</div>
           </div>
-          <span class="status-badge ${t.status === 'AVAILABLE' ? 'status-COMPLETED' : 'status-IN-PROGRESS'}">${escapeHtml(t.status)}</span>
+          <span class="status-tag ${t.status === 'AVAILABLE' ? 'tag-COMPLETED' : 'tag-IN-PROGRESS'}">${escapeHtml(t.status)}</span>
         </div>
-        <div style="font-size:12px; color:var(--text-muted); display:flex; justify-content:space-between;">
-          <span>📞 ${escapeHtml(t.phone)}</span>
-          <span style="font-weight:600; color:var(--text-dark);">Active Jobs: ${t.activeJobs}</span>
+        <div style="font-size:12px; color:var(--text-muted); display:flex; justify-content:space-between; margin-top:6px;">
+          <span>Phone: ${escapeHtml(t.phone)}</span>
+          <span style="font-weight:600; color:var(--text-main);">Active Jobs: ${t.activeJobs}</span>
         </div>
       `;
       techContainer.appendChild(card);
     });
   }
 
-  // GLOBAL ACTIONS
   window.toggleBookingStatus = function(id) {
     const booking = bookingsData.find(b => b.id === id);
     if (booking) {
@@ -306,7 +292,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const booking = bookingsData.find(b => b.id === id);
     if (booking) {
       booking.technician = techValue;
-      alert(`Assigned job to ${techValue}`);
     }
   };
 
@@ -322,13 +307,12 @@ document.addEventListener('DOMContentLoaded', () => {
       let invMsg = `*FIXOWE OFFICIAL SERVICE INVOICE*%0A%0A`;
       invMsg += `*Customer:* ${encodeURIComponent(b.name)}%0A`;
       invMsg += `*Service:* ${encodeURIComponent(b.service)}%0A`;
-      invMsg += `*Estimated Cost:* ${encodeURIComponent(b.estimatedCost)}%0A%0A`;
-      invMsg += `Thank you for choosing Fixowe Service Network!%0AHost Helpline: +916235780788`;
+      invMsg += `*Estimated Amount:* ${encodeURIComponent(b.estimatedCost)}%0A%0A`;
+      invMsg += `Thank you for choosing Fixowe Service Network!%0AHelpline: +916235780788`;
       window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${invMsg}`, '_blank');
     }
   };
 
-  // MODAL TOGGLES
   fabCreateLead.addEventListener('click', () => modalAddLead.classList.add('active'));
   btnOpenAddTech.addEventListener('click', () => modalAddTech.classList.add('active'));
 
@@ -339,7 +323,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // SUBMIT HANDLERS
   formCreateLead.addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('lead-name').value.trim();
@@ -384,7 +367,6 @@ document.addEventListener('DOMContentLoaded', () => {
     formCreateTech.reset();
   });
 
-  // REAL-TIME FIRESTORE LISTENER
   function initFirestoreListener() {
     if (typeof db !== 'undefined' && db) {
       db.collection("bookings").onSnapshot((snapshot) => {
@@ -419,14 +401,12 @@ document.addEventListener('DOMContentLoaded', () => {
   btnSyncLive.addEventListener('click', () => {
     initFirestoreListener();
     renderBookings();
-    alert("Synced live Firestore database!");
   });
 
   function escapeHtml(str) {
     return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  // INITIAL RENDER & AUTH CHECK
   checkAuthSession();
   renderBookings();
   renderTechnicians();
