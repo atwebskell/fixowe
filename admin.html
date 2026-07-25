@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fixowe Admin Control Portal | Secure Management</title>
+  <meta name="description" content="Secure administrative operations portal for Fixowe field service management." />
+  
+  <link rel="icon" type="image/png" href="assets/favicon-optimized.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Firebase SDKs (v9 compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+    :root {
+      --bg-primary: #FFFFFF;
+      --bg-secondary: #FAFAFA;
+      --bg-tertiary: #F1F5F9;
+      --text-dark: #0F172A;
+      --text-muted: #64748B;
+      --border-color: #E2E8F0;
+      --accent-blue: #2563EB;
+      --accent-green: #10B981;
+      --accent-red: #EF4444;
+      --accent-amber: #F59E0B;
+      --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-family);
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- AUTHENTICATION GATE OVERLAY --- */
+    #auth-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: #FFFFFF;
+      border-radius: 16px;
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      text-align: center;
+    }
+
+    .auth-card img {
+      height: 40px;
+      margin-bottom: 16px;
+    }
+
+    .auth-card h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+
+    .auth-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--text-dark);
+    }
+
+    .btn-auth {
+      width: 100%;
+      padding: 14px;
+      background: var(--text-dark);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-auth:hover {
+      opacity: 0.9;
+    }
+
+    .auth-error {
+      color: var(--accent-red);
+      font-size: 12px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    /* --- DASHBOARD HEADER --- */
+    header.admin-header {
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-container img {
+      height: 32px;
+    }
+
+    .badge-super-admin {
+      background: #EFF6FF;
+      color: #1D4ED8;
+      border: 1px solid #BFDBFE;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-icon-secondary {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-dark);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-logout {
+      background: #FEF2F2;
+      border: 1px solid #FCA5A5;
+      color: var(--accent-red);
+    }
+
+    /* --- NAVIGATION TABS --- */
+    .nav-tabs-container {
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 24px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      padding: 14px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border: none;
+      background: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--text-dark);
+      border-bottom-color: var(--text-dark);
+    }
+
+    /* --- METRIC COUNTERS STRIP --- */
+    .metric-strip {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      overflow-x: auto;
+    }
+
+    .metric-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .metric-count {
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    /* --- MAIN CONTENT AREA --- */
+    main.admin-main {
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      flex: 1;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* SEARCH & FILTER BAR */
+    .toolbar-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .search-input-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .search-input-wrapper input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 13px;
+      background: var(--bg-secondary);
+    }
+
+    .search-input-wrapper svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      fill: var(--text-muted);
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 6px;
+    }
+
+    .pill-btn {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .pill-btn.active {
+      background: var(--text-dark);
+      color: #FFFFFF;
+      border-color: var(--text-dark);
+    }
+
+    /* BOOKING CARDS GRID */
+    .bookings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+    }
+
+    .booking-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .booking-card:hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .customer-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .booking-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .status-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+    }
+
+    .status-NEW { background: #FEF2F2; color: #DC2626; border: 1px solid #FCA5A5; }
+    .status-IN-PROGRESS { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; }
+    .status-COMPLETED { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+
+    .service-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-blue);
+    }
+
+    .location-text {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .note-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--bg-tertiary);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #334155;
+      font-style: italic;
+    }
+
+    .machine-photo-container {
+      width: 100%;
+      height: 140.dp;
+      height: 140px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg-tertiary);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .machine-photo-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-overlay-tag {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #FFFFFF;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .tech-select-wrapper select {
+      width: 100%;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--bg-secondary);
+      color: var(--text-dark);
+      cursor: pointer;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: #FFFFFF;
+      color: var(--text-dark);
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-whatsapp { background: var(--text-dark); color: #FFFFFF; border-color: var(--text-dark); }
+    .btn-invoice { border-color: var(--accent-green); color: var(--accent-green); font-weight: 700; }
+
+    /* TECHNICIANS ROSTER GRID */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .tech-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* MODALS */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #FFFFFF;
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    /* FAB ADD BUTTON */
+    .fab-add {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--text-dark);
+      color: #FFFFFF;
+      border: none;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      z-index: 90;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🔒 BANK-GRADE AUTHENTICATION GATE -->
+  <div id="auth-overlay">
+    <div class="auth-card">
+      <img src="assets/transparent-logo-fixowe.png" alt="Fixowe Logo" />
+      <h2>Fixowe Admin Portal</h2>
+      <p>Enter administrative credentials to access control dashboard</p>
+
+      <form id="admin-login-form">
+        <div class="form-group">
+          <label for="admin-email">Admin Username / Email</label>
+          <input type="text" id="admin-email" class="form-control" value="admin@fixowe.com" required />
+        </div>
+        <div class="form-group">
+          <label for="admin-pin">Master Passcode / PIN</label>
+          <input type="password" id="admin-pin" class="form-control" value="1234" required />
+        </div>
+        <button type="submit" class="btn-auth">Sign In to Dashboard</button>
+        <div id="auth-error-msg" class="auth-error">Invalid admin credentials. Access Denied.</div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DASHBOARD HEADER -->
+  <header class="admin-header">
+    <div class="brand-container">
+      <img src="assets/transparent-logo-fixowe.png" alt="Fixowe Brand Logo" />
+      <span class="badge-super-admin">👑 SUPER ADMIN PORTAL</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon-secondary" id="btn-sync-live">🔄 Sync Firestore</button>
+      <button class="btn-icon-secondary btn-logout" id="btn-admin-logout">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- NAVIGATION TABS -->
+  <div class="nav-tabs-container">
+    <button class="tab-btn active" data-tab="tab-bookings">📋 Live Service Bookings</button>
+    <button class="tab-btn" data-tab="tab-technicians">👨‍🔧 Technician Management</button>
+  </div>
+
+  <!-- METRIC COUNTERS STRIP -->
+  <div class="metric-strip">
+    <div class="metric-item">Total Leads: <span class="metric-count" id="count-total">0</span></div>
+    <div>•</div>
+    <div class="metric-item">New: <span class="metric-count" id="count-new" style="color:var(--accent-red)">0</span></div>
+    <div>•</div>
+    <div class="metric-item">In Progress: <span class="metric-count" id="count-active" style="color:var(--accent-amber)">0</span></div>
+    <div>•</div>
+    <div class="metric-item">Completed: <span class="metric-count" id="count-completed" style="color:var(--accent-green)">0</span></div>
+  </div>
+
+  <!-- MAIN DASHBOARD CONTENT -->
+  <main class="admin-main">
+    
+    <!-- TAB 1: BOOKINGS -->
+    <section id="tab-bookings" class="tab-content active">
+      <div class="toolbar-bar">
+        <div class="search-input-wrapper">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" id="search-input" placeholder="Search customer, phone, location or service..." />
+        </div>
+        <div class="filter-pills">
+          <button class="pill-btn active" data-filter="ALL">All</button>
+          <button class="pill-btn" data-filter="NEW">New</button>
+          <button class="pill-btn" data-filter="IN_PROGRESS">In Progress</button>
+          <button class="pill-btn" data-filter="COMPLETED">Completed</button>
+        </div>
+      </div>
+
+      <div class="bookings-grid" id="bookings-container">
+        <!-- Live booking cards rendered via JS -->
+      </div>
+    </section>
+
+    <!-- TAB 2: TECHNICIAN MANAGEMENT -->
+    <section id="tab-technicians" class="tab-content">
+      <div class="toolbar-bar">
+        <div>
+          <h2 style="font-size:16px; font-weight:700;">Field Technician Roster</h2>
+          <p style="font-size:12px; color:var(--text-muted);">Super Admin: Add new technicians with 100% custom designations</p>
+        </div>
+        <button class="btn-icon-secondary" id="btn-open-add-tech" style="background:var(--accent-blue); color:#FFF; border:none;">+ Add Technician</button>
+      </div>
+
+      <div class="tech-grid" id="tech-container">
+        <!-- Technician cards rendered via JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FAB CREATE LEAD BUTTON -->
+  <button class="fab-add" id="fab-create-lead" title="Create New Customer Lead">+</button>
+
+  <!-- MODAL: ADD CUSTOMER LEAD -->
+  <div class="modal-overlay" id="modal-add-lead">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Create Manual Lead / Phone Order</div>
+        <button class="modal-close" data-close="modal-add-lead">&times;</button>
+      </div>
+      <form id="form-create-lead">
+        <div class="form-group">
+          <label>Customer Name</label>
+          <input type="text" id="lead-name" class="form-control" placeholder="e.g. Rahul Sharma" required />
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="lead-phone" class="form-control" placeholder="e.g. +916235780788" required />
+        </div>
+        <div class="form-group">
+          <label>Service Category</label>
+          <input type="text" id="lead-service" class="form-control" value="AC Repair & Servicing" required />
+        </div>
+        <div class="form-group">
+          <label>Diagnostic Note / Machine Error</label>
+          <input type="text" id="lead-note" class="form-control" placeholder="e.g. Water leaking from indoor unit" />
+        </div>
+        <button type="submit" class="btn-auth">Save & Sync to Firebase</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: SUPER ADMIN ADD TECHNICIAN -->
+  <div class="modal-overlay" id="modal-add-tech">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">👑 Add Technician with Custom Role</div>
+        <button class="modal-close" data-close="modal-add-tech">&times;</button>
+      </div>
+      <form id="form-create-tech">
+        <div class="form-group">
+          <label>Technician Full Name</label>
+          <input type="text" id="tech-name" class="form-control" placeholder="e.g. Ashfak S." required />
+        </div>
+        <div class="form-group">
+          <label>Custom Designation / Post (Type Any Role!)</label>
+          <input type="text" id="tech-role" class="form-control" placeholder="e.g. Master AC Repair Lead" required />
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="tech-phone" class="form-control" placeholder="e.g. +916235780788" required />
+        </div>
+        <button type="submit" class="btn-auth" style="background:var(--accent-blue);">Add Technician to Roster</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: IMAGE HIGH-RES VIEWER -->
+  <div class="modal-overlay" id="modal-photo-viewer">
+    <div class="modal-content" style="max-width:600px; text-align:center;">
+      <div class="modal-header">
+        <div class="modal-title">Customer Machine Photo</div>
+        <button class="modal-close" data-close="modal-photo-viewer">&times;</button>
+      </div>
+      <img id="high-res-img" src="" alt="Machine Photo" style="width:100%; height:320px; object-fit:cover; border-radius:12px;" />
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

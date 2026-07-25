@@ -4,140 +4,145 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>404 - Page Not Found | Fixowe</title>
-  <link rel="icon" type="image/png" href="/assets/transparent-logo-fixowe.png">
-  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" type="image/png" href="/assets/favicon-optimized.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body, html {
-      height: 100%;
+    :root {
+      --primary-red: #e11d48;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --bg-color: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      overflow: hidden;
     }
-    
-    .error-page-wrapper {
-      position: relative;
+
+    body, html {
+      min-height: 100vh;
       width: 100%;
-      height: 100vh;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-color);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background-image: url('/assets/hero_bg.png');
-      background-size: cover;
-      background-position: center;
-    }
-
-    .error-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, rgba(3, 17, 49, 0.95) 0%, rgba(7, 30, 84, 0.85) 100%);
-      z-index: 1;
-    }
-
-    .error-content {
-      position: relative;
-      z-index: 2;
+      padding: 40px 20px;
       text-align: center;
-      padding: 40px;
-      color: #fff;
-      max-width: 700px;
-      margin: 0 auto;
     }
 
-    .logo-container {
-      margin-bottom: 60px;
+    .brand-logo {
+      height: 52px;
+      margin-bottom: 40px;
     }
 
-    .logo-container img {
-      height: 70px;
-      filter: brightness(0) invert(1);
-    }
-
-    .error-code {
-      font-size: 180px;
-      font-weight: 900;
-      line-height: 0.9;
-      background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.3) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 20px;
-      text-shadow: 0 20px 40px rgba(0,0,0,0.3);
-      font-family: var(--font-primary, 'Inter', sans-serif);
-      letter-spacing: -5px;
-    }
-
-    .error-title {
-      font-size: 42px;
-      font-weight: 800;
-      margin-bottom: 24px;
-      letter-spacing: -0.5px;
-      font-family: var(--font-primary, 'Inter', sans-serif);
-    }
-
-    .error-desc {
-      font-size: 18px;
-      color: rgba(255, 255, 255, 0.8);
-      margin-bottom: 50px;
-      line-height: 1.6;
-      max-width: 500px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .btn-return {
+    /* Graphic 404 with Ghost */
+    .hero-404-box {
+      position: relative;
       display: inline-flex;
       align-items: center;
-      gap: 12px;
-      background: var(--accent-green, #2ca84a);
-      color: #fff;
-      padding: 18px 46px;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+
+    .number-404 {
+      font-size: 130px;
+      font-weight: 900;
+      color: var(--primary-red);
+      line-height: 1;
+      letter-spacing: -4px;
+      display: flex;
+      align-items: center;
+    }
+
+    .ghost-icon {
+      width: 90px;
+      height: 90px;
+      margin: 0 4px;
+      animation: floatGhost 3s infinite ease-in-out;
+    }
+
+    @keyframes floatGhost {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .title {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 14px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 480px;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    .subtitle a {
+      color: var(--primary-red);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .subtitle a:hover {
+      text-decoration: underline;
+    }
+
+    .btn-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--primary-red);
+      color: #ffffff;
+      padding: 16px 36px;
       border-radius: 50px;
       font-size: 16px;
       font-weight: 700;
       text-decoration: none;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 10px 20px rgba(44, 168, 74, 0.2);
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 25px rgba(225, 29, 72, 0.25);
     }
 
-    .btn-return:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 15px 30px rgba(44, 168, 74, 0.4);
-      background: #238b3c;
-    }
-
-    .btn-return i {
-      transition: transform 0.3s ease;
-    }
-
-    .btn-return:hover i {
-      transform: translateX(-5px);
+    .btn-home:hover {
+      background: #be123c;
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(225, 29, 72, 0.35);
     }
   </style>
 </head>
 <body>
 
-  <div class="error-page-wrapper">
-    <div class="error-overlay"></div>
-    
-    <div class="error-content">
-      <div class="logo-container">
-        <a href="/index.html">
-          <img src="/assets/transparent-logo-fixowe.png" alt="Fixowe Logo">
-        </a>
-      </div>
+  <a href="/index.html">
+    <img src="/assets/transparent-logo-fixowe.png" alt="Fixowe Logo" class="brand-logo">
+  </a>
 
-      <div class="error-code">404</div>
-      <h2 class="error-title">Page Not Found</h2>
-      <p class="error-desc">The page you are looking for has been moved, deleted, or never existed in the first place.</p>
-      <a href="/index.html" class="btn-return">
-        <i class="fa-solid fa-arrow-left"></i> Return Home
-      </a>
+  <div class="hero-404-box">
+    <div class="number-404">
+      4
+      <svg class="ghost-icon" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 10C30 10 20 25 20 45V85L32 75L44 85L50 78L56 85L68 75L80 85V45C80 25 70 10 50 10Z" fill="#e11d48"/>
+        <circle cx="38" cy="40" r="5" fill="#ffffff"/>
+        <circle cx="62" cy="40" r="5" fill="#ffffff"/>
+        <ellipse cx="50" cy="54" rx="6" ry="8" fill="#ffffff"/>
+      </svg>
+      4
     </div>
   </div>
+
+  <h1 class="title">Page not found</h1>
+  <p class="subtitle">The Page you are looking for doesn't exist or an other error occurred. Go back, or head over to <a href="/index.html">Home</a></p>
+
+  <a href="/index.html" class="btn-home">
+    <i class="fa-solid fa-house"></i> Return to Homepage
+  </a>
 
 </body>
 </html>

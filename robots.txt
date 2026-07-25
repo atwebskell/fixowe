@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://fixowe.com/sitemap.xml
+Sitemap: https://www.fixowe.com/sitemap.xml

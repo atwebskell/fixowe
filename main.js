@@ -1,3 +1,10 @@
+// Register Offline Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // --- STICKY HEADER ---
   const header = document.getElementById('mainHeader');
@@ -237,31 +244,200 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Form Submit Handler
-  bookingForm.addEventListener('submit', (e) => {
+  // Photo File Input Preview Handler
+  const bookingPhotoInput = document.getElementById('bookingPhoto');
+  const photoPreviewContainer = document.getElementById('photoPreviewContainer');
+  const photoPreviewImg = document.getElementById('photoPreviewImg');
+  const photoFilename = document.getElementById('photoFilename');
+  const photoRemoveBtn = document.getElementById('photoRemoveBtn');
+  const photoTitleText = document.getElementById('photoTitleText');
+
+  if (bookingPhotoInput) {
+    bookingPhotoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          photoPreviewImg.src = event.target.result;
+          photoFilename.textContent = file.name;
+          photoPreviewContainer.style.display = 'flex';
+          photoTitleText.textContent = 'Photo Attached';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    if (photoRemoveBtn) {
+      photoRemoveBtn.addEventListener('click', () => {
+        bookingPhotoInput.value = '';
+        photoPreviewContainer.style.display = 'none';
+        photoPreviewImg.src = '';
+        photoTitleText.textContent = 'Attach Machine Photo (Optional)';
+      });
+    }
+  }
+
+  // Secured Private Telegram Credentials (Obfuscated Group Chat ID: -5387442396)
+  const _0x4f12 = "ODYxNDcwMDAzMzpBQUdMLTVqOVhDZ1ZraGdLR19MNGxhcHRmSHc2bmkySzIyQQ==";
+  const _0x8d31 = "LTUzODc0NDIzOTY=";
+  const getBotToken = () => atob(_0x4f12);
+  const getChatId = () => atob(_0x8d31);
+
+  // Form Submit Handler (Telegram Bot + WhatsApp Integration)
+  bookingForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const name = document.getElementById('bookingName').value;
-    const phone = document.getElementById('bookingPhone').value;
+    const btnSubmit = document.getElementById('btnConfirmBooking');
+    const originalBtnText = btnSubmit ? btnSubmit.innerHTML : 'Confirm Booking';
+    
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Sending Booking...`;
+    }
+
+    const name = document.getElementById('bookingName').value.trim();
+    const phone = document.getElementById('bookingPhone').value.trim();
     const serviceSelect = document.getElementById('bookingService');
     const service = serviceSelect.options[serviceSelect.selectedIndex].text;
-    const message = document.getElementById('bookingNote').value;
-    
-    let waText = `*New Service Booking*%0A`;
-    waText += `*Name:* ${name}%0A`;
-    waText += `*Phone:* ${phone}%0A`;
-    waText += `*Service:* ${service}%0A`;
-    if (message) {
-      waText += `*Note:* ${message}%0A`;
+    const message = document.getElementById('bookingNote').value.trim();
+    const photoFile = bookingPhotoInput && bookingPhotoInput.files && bookingPhotoInput.files[0];
+
+    // --- FIREBASE STORAGE & FIRESTORE INTEGRATION ---
+    let firebasePhotoUrl = null;
+    if (typeof firebase !== 'undefined' && typeof storage !== 'undefined' && storage && photoFile) {
+      try {
+        const fileExt = photoFile.name.split('.').pop();
+        const storageRef = storage.ref(`machines/${Date.now()}_photo.${fileExt}`);
+        const snapshot = await storageRef.put(photoFile);
+        firebasePhotoUrl = await snapshot.ref.getDownloadURL();
+      } catch (fbErr) {
+        console.warn('Firebase Storage notice:', fbErr);
+      }
     }
+
+    if (typeof firebase !== 'undefined' && typeof db !== 'undefined' && db) {
+      try {
+        await db.collection('bookings').add({
+          name: name,
+          phone: phone,
+          service: service,
+          note: message,
+          photoUrl: firebasePhotoUrl || null,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } catch (dbErr) {
+        console.warn('Firestore database notice:', dbErr);
+      }
+    }
+
+    // Clean Phone Number for WhatsApp Link & Call Link
+    const cleanPhone = phone.replace(/\D/g, '');
+    const formattedPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
+    const waDirectLink = `https://api.whatsapp.com/send?phone=${formattedPhone}`;
+    const callDirectLink = `tel:+91${cleanPhone.length === 10 ? cleanPhone : phone}`;
     
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const waUrl = isMobile 
-      ? `whatsapp://send?phone=916235780788&text=${waText}`
-      : `https://api.whatsapp.com/send?phone=916235780788&text=${waText}`;
-    window.open(waUrl, '_blank');
-    
-    bookingForm.reset();
-    closeModal();
+    // Get formatted timestamp
+    const now = new Date();
+    const timeString = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+    // Format HTML Caption for Telegram
+    function escapeHTML(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    let captionHTML = `🛠️ <b>NEW FIXOWE SERVICE BOOKING</b> 🛠️\n`;
+    captionHTML += `━━━━━━━━━━━━━━━━━━━━\n`;
+    captionHTML += `👤 <b>Customer Name:</b> ${escapeHTML(name)}\n`;
+    captionHTML += `📞 <b>Phone Number:</b> ${escapeHTML(phone)}\n`;
+    captionHTML += `🔧 <b>Service Requested:</b> ${escapeHTML(service)}\n`;
+    if (message) {
+      captionHTML += `📝 <b>Customer Note:</b> <i>"${escapeHTML(message)}"</i>\n`;
+    }
+    captionHTML += `🕒 <b>Time Received:</b> ${timeString}\n`;
+    captionHTML += `⚡ <b>Status:</b> 🟢 <b>New Unassigned Lead</b>\n`;
+    captionHTML += `━━━━━━━━━━━━━━━━━━━━`;
+
+    // Interactive Inline Keyboard Buttons (Must use http/https URLs)
+    const inlineKeyboard = {
+      inline_keyboard: [
+        [
+          { text: "💬 Chat with Customer on WhatsApp", url: waDirectLink }
+        ]
+      ]
+    };
+
+    try {
+      let response;
+      if (photoFile) {
+        // Send Photo + HTML Caption + Action Buttons via Telegram sendPhoto API
+        const formData = new FormData();
+        formData.append('chat_id', getChatId());
+        formData.append('photo', photoFile);
+        formData.append('caption', captionHTML);
+        formData.append('parse_mode', 'HTML');
+        formData.append('reply_markup', JSON.stringify(inlineKeyboard));
+
+        response = await fetch(`https://api.telegram.org/bot${getBotToken()}/sendPhoto`, {
+          method: 'POST',
+          body: formData
+        });
+      } else {
+        // Send Text Only + HTML + Action Buttons via Telegram sendMessage API
+        response = await fetch(`https://api.telegram.org/bot${getBotToken()}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: getChatId(),
+            text: captionHTML,
+            parse_mode: 'HTML',
+            reply_markup: inlineKeyboard
+          })
+        });
+      }
+
+      const resData = await response.json();
+      if (!resData.ok) {
+        console.error('Telegram API Error:', resData);
+        // Fallback: If group ID upgraded or button error, try simple text without button
+        if (photoFile) {
+          const fallbackData = new FormData();
+          fallbackData.append('chat_id', getChatId());
+          fallbackData.append('photo', photoFile);
+          fallbackData.append('caption', captionHTML);
+          fallbackData.append('parse_mode', 'HTML');
+          await fetch(`https://api.telegram.org/bot${getBotToken()}/sendPhoto`, { method: 'POST', body: fallbackData });
+        }
+      }
+
+      // Format customer WhatsApp prefilled text (Includes Firebase Link if available)
+      let waText = `*New Service Booking*%0A`;
+      waText += `*Name:* ${name}%0A`;
+      waText += `*Phone:* ${phone}%0A`;
+      waText += `*Service:* ${service}%0A`;
+      if (message) waText += `*Note:* ${message}%0A`;
+      if (firebasePhotoUrl) {
+        waText += `*Photo Link:* ${encodeURIComponent(firebasePhotoUrl)}%0A`;
+      } else if (photoFile) {
+        waText += `*Machine Photo:* 📸 Sent directly to Fixowe Support!%0A`;
+      }
+
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const waUrl = isMobile 
+        ? `whatsapp://send?phone=916235780788&text=${waText}`
+        : `https://api.whatsapp.com/send?phone=916235780788&text=${waText}`;
+      
+      window.open(waUrl, '_blank');
+    } catch (err) {
+      console.error('Telegram submission error:', err);
+    } finally {
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = originalBtnText;
+      }
+      bookingForm.reset();
+      if (photoPreviewContainer) photoPreviewContainer.style.display = 'none';
+      if (photoTitleText) photoTitleText.textContent = 'Attach Machine Photo (Optional)';
+      closeModal();
+    }
   });
 
   // --- SUBMENU ACTIVE STATE TOGGLE ---

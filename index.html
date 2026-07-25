@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Kerala's most trusted technical service. We specialize in premium AC installation, cold storage projects, and emergency repair. Fast, reliable, and guaranteed.">
-  <title>Fixowe | Expert AC & Cold Storage Services in Kerala</title>
+  <title>Fixowe | Expert AC & Commercial Cold Storage Services in Kerala</title>
+  <link rel="canonical" href="https://www.fixowe.com/">
   
   <!-- Open Graph & Social Cards -->
   <meta property="og:title" content="Fixowe | Expert AC & Cold Storage Services in Kerala">
@@ -21,34 +22,73 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Font Awesome 6 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous">
-  <!-- Stylesheet -->
-  <link rel="icon" type="image/png" href="assets/favicon-optimized.png">
+  <!-- Favicons (Google Search Compliant) -->
+  <link rel="icon" type="image/png" sizes="192x192" href="https://www.fixowe.com/assets/favicon-optimized.png">
+  <link rel="shortcut icon" href="https://www.fixowe.com/assets/favicon-optimized.png">
+  <link rel="apple-touch-icon" href="https://www.fixowe.com/assets/favicon-optimized.png">
   
   <!-- Performance Preloads -->
   <link rel="preload" href="assets/hero_bg.png" as="image">
   <link rel="preload" href="assets/transparent-logo-fixowe.png" as="image">
   
-  <link rel="stylesheet" href="style.css?v=22.0">
+  <link rel="stylesheet" href="style.css?v=24.0">
 
-  <!-- Core JSON-LD SEO Schema -->
   <script type="application/ld+json">
   {
+    "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    "name": "Fixowe - Kerala Appliance & Cold Storage Experts",
-    "image": "https://fixowe.com/assets/transparent-logo-fixowe.png",
-    "description": "Premium 24/7 emergency repair and installation services for commercial cold storage, air conditioning, and home appliances in Kerala.",
-    "url": "https://fixowe.com",
+    "name": "Fixowe - AC & Commercial Cold Storage Experts",
+    "image": "https://www.fixowe.com/assets/transparent-logo-fixowe.png",
+    "description": "Kerala's #1 technical service provider for AC installation, commercial cold storage projects, washing machine repair, and preventive maintenance in Manjeri and Malappuram.",
+    "url": "https://www.fixowe.com",
     "telephone": "+916235780788",
     "priceRange": "₹₹",
     "address": {
       "@type": "PostalAddress",
+      "streetAddress": "Manjeri",
+      "addressLocality": "Manjeri",
       "addressRegion": "Kerala",
+      "postalCode": "676121",
       "addressCountry": "IN"
     },
     "geo": {
       "@type": "GeoCoordinates",
-      "latitude": "10.8505",
-      "longitude": "76.2711"
+      "latitude": "11.1202",
+      "longitude": "76.1221"
+    },
+    "areaServed": [
+      "Manjeri",
+      "Malappuram",
+      "Perinthalmanna",
+      "Calicut",
+      "Kerala"
+    ],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Fixowe Technical Services",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "AC Repair & Installation Services in Manjeri"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Commercial Cold Storage Construction & Repair Kerala"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Washing Machine & Home Appliance Repair"
+          }
+        }
+      ]
     },
     "openingHoursSpecification": {
       "@type": "OpeningHoursSpecification",
@@ -175,8 +215,8 @@
     <div class="hero-container">
       <!-- Left Column: Hero Text Content -->
       <div class="hero-content">
-        <h1 class="hero-title">We Fix It Right.<br><span class="highlight-text">You Relax.</span></h1>
-        <p class="hero-desc">Expert repair, installation & maintenance for cold storage, AC, and home appliances. Fast. Reliable. Affordable.</p>
+        <h1 class="hero-title">AC Repair & Commercial Cold Storage Services in Kerala</h1>
+        <p class="hero-desc">Professional technical services in Manjeri, Malappuram. We specialize in AC installation, cold storage projects, washing machine repair, and preventive maintenance. We Fix It Right. You Relax.</p>
         
         <div class="hero-actions">
           <button class="btn btn-primary btn-book-trigger">
@@ -215,7 +255,7 @@
       <!-- Right Column: Framed Image and Overlays -->
       <div class="hero-right-side">
         <div class="hero-image-frame">
-          <img src="assets/hero_bg.png" alt="Fixowe Service Professional" class="hero-frame-img" fetchpriority="high" decoding="async">
+          <img src="assets/hero_bg.png" alt="Fixowe expert HVAC and AC repair technician in Manjeri Kerala" class="hero-frame-img" fetchpriority="high" decoding="async">
         </div>
 
         <!-- Need Immediate Help Badge -->
@@ -625,7 +665,7 @@
           <ul class="widget-links">
             <li><a href="#contact">Book a Service</a></li>
             <li><a href="#faq">FAQs</a></li>
-            <li><a href="#contact">Privacy Policy</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
             <li><a href="terms.html">Terms & Conditions</a></li>
           </ul>
         </div>
@@ -710,10 +750,30 @@
             <i class="fa-solid fa-chevron-down select-chevron"></i>
           </div>
           <div class="form-group floating">
-            <textarea id="bookingNote" rows="3" placeholder=" "></textarea>
+            <textarea id="bookingNote" rows="2" placeholder=" "></textarea>
             <label for="bookingNote">Add Note (Optional)</label>
           </div>
-          <button type="submit" class="btn btn-primary w-full">Confirm Booking</button>
+
+          <!-- Machine Photo Upload Field -->
+          <div class="form-group photo-upload-group">
+            <label class="photo-upload-label" id="photoUploadBox" for="bookingPhoto">
+              <i class="fa-solid fa-camera photo-icon"></i>
+              <div class="photo-text-box">
+                <span class="photo-title" id="photoTitleText">Attach Machine Photo (Optional)</span>
+                <span class="photo-sub" id="photoSubText">Upload or take a photo of the damaged machine</span>
+              </div>
+              <input type="file" id="bookingPhoto" accept="image/*" capture="environment" style="display: none;">
+            </label>
+            <div class="photo-preview-container" id="photoPreviewContainer" style="display: none;">
+              <div class="preview-thumb-box">
+                <img id="photoPreviewImg" src="" alt="Machine Preview">
+                <span class="photo-filename" id="photoFilename">machine_photo.jpg</span>
+              </div>
+              <button type="button" class="photo-remove-btn" id="photoRemoveBtn" aria-label="Remove Photo">&times;</button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full" id="btnConfirmBooking">Confirm Booking</button>
         </form>
       </div>
     </div>
@@ -769,14 +829,36 @@
         <span>📍 Gurugram & Ghaziabad</span>
       </div>
     </div>
+
+    <div class="sidebar-section" style="margin-top:20px; border-top:1px solid #E2E8F0; padding-top:16px;">
+      <a href="admin.html" style="color:#0F172A; text-decoration:none; font-size:13px; font-weight:700; display:flex; align-items:center; gap:8px;">
+        <span>🔒 Fixowe Admin Portal</span>
+      </a>
+    </div>
   </div>
   
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  <script src="main.js?v=12.0"></script>
+  <!-- Firebase JS SDK (v9 Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <script src="main.js?v=31.0"></script>
   <script src="blog.js"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
 
 
 
