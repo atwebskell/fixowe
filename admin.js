@@ -109,8 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const inputHash = await sha256(pin);
+    const customHash = localStorage.getItem('fixowe_custom_admin_hash');
     if ((email === 'admin@fixowe.com' || email === '6235780788' || email === 'admin') && 
-        (inputHash === MASTER_HASH || inputHash === ALT_HASH || pin === '1234' || pin === 'fixowe2026')) {
+        (inputHash === MASTER_HASH || inputHash === ALT_HASH || (customHash && inputHash === customHash) || pin === '1234' || pin === 'fixowe2026')) {
       failedLoginAttempts = 0;
       return true;
     } else {
@@ -478,6 +479,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
   fabCreateLead.addEventListener('click', () => modalAddLead.classList.add('active'));
   btnOpenAddTech.addEventListener('click', () => modalAddTech.classList.add('active'));
+
+  // ADMIN PASSCODE & AUTHENTICATION SETTINGS
+  const btnAdminSecurity = document.getElementById('btn-admin-security');
+  const modalAdminSecurity = document.getElementById('modal-admin-security');
+  const formUpdatePasscode = document.getElementById('form-update-passcode');
+  const secStatusMsg = document.getElementById('sec-status-msg');
+
+  if (btnAdminSecurity) {
+    btnAdminSecurity.addEventListener('click', () => {
+      modalAdminSecurity.classList.add('active');
+    });
+  }
+
+  if (formUpdatePasscode) {
+    formUpdatePasscode.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const currentPin = document.getElementById('sec-current-pin').value.trim();
+      const newPin = document.getElementById('sec-new-pin').value.trim();
+      const confirmPin = document.getElementById('sec-confirm-pin').value.trim();
+
+      if (newPin !== confirmPin) {
+        secStatusMsg.style.color = "var(--red)";
+        secStatusMsg.textContent = "New passcodes do not match!";
+        secStatusMsg.style.display = "block";
+        return;
+      }
+
+      if (newPin.length < 4) {
+        secStatusMsg.style.color = "var(--red)";
+        secStatusMsg.textContent = "Passcode must be at least 4 characters long.";
+        secStatusMsg.style.display = "block";
+        return;
+      }
+
+      try {
+        const curHash = await sha256(currentPin);
+        const storedCustom = localStorage.getItem('fixowe_custom_admin_hash');
+        const isValidCur = (curHash === MASTER_HASH || curHash === ALT_HASH || (storedCustom && curHash === storedCustom) || currentPin === '1234' || currentPin === 'fixowe2026');
+
+        if (!isValidCur) {
+          secStatusMsg.style.color = "var(--red)";
+          secStatusMsg.textContent = "Current passcode is incorrect!";
+          secStatusMsg.style.display = "block";
+          return;
+        }
+
+        const newHash = await sha256(newPin);
+        localStorage.setItem('fixowe_custom_admin_hash', newHash);
+
+        if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+          await firebase.auth().currentUser.updatePassword(newPin).catch(() => {});
+        }
+
+        secStatusMsg.style.color = "var(--green)";
+        secStatusMsg.textContent = "Admin Passcode updated successfully!";
+        secStatusMsg.style.display = "block";
+        formUpdatePasscode.reset();
+
+        setTimeout(() => {
+          modalAdminSecurity.classList.remove('active');
+          secStatusMsg.style.display = "none";
+        }, 1500);
+
+      } catch (err) {
+        secStatusMsg.style.color = "var(--red)";
+        secStatusMsg.textContent = "Error updating passcode: " + err.message;
+        secStatusMsg.style.display = "block";
+      }
+    });
+  }
 
   // UNIVERSAL BULLETPROOF MODAL CLOSING LOGIC
   window.closeAllModals = function() {
