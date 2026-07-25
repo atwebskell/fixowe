@@ -207,6 +207,20 @@ document.addEventListener('DOMContentLoaded', () => {
     countActive.textContent = bookingsData.filter(b => b.status === 'IN PROGRESS').length;
     countCompleted.textContent = bookingsData.filter(b => b.status === 'COMPLETED').length;
 
+    // Revenue Calculations
+    let totalPipeline = 0;
+    let totalCollected = 0;
+    bookingsData.forEach(b => {
+      const amt = parseInt((b.estimatedCost || "1200").replace(/[^0-9]/g, '')) || 1200;
+      totalPipeline += amt;
+      if (b.status === 'COMPLETED') totalCollected += amt;
+    });
+
+    const elPipeline = document.getElementById('val-pipeline');
+    const elCollected = document.getElementById('val-collected');
+    if (elPipeline) elPipeline.textContent = `₹${totalPipeline.toLocaleString('en-IN')}`;
+    if (elCollected) elCollected.textContent = `₹${totalCollected.toLocaleString('en-IN')}`;
+
     if (filtered.length === 0) {
       bookingsContainer.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted);">No records found.</div>`;
       return;
@@ -399,6 +413,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${invMsg}`, '_blank');
       }
+    });
+  }
+
+  // EXPORT TO CSV FEATURE
+  const btnExportCsv = document.getElementById('btn-export-csv');
+  if (btnExportCsv) {
+    btnExportCsv.addEventListener('click', () => {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += "Booking ID,Customer Name,Phone Number,Service,Location,Status,Technician,Estimated Amount,Date Time\n";
+
+      bookingsData.forEach(b => {
+        const row = [
+          `"${b.id}"`,
+          `"${b.name.replace(/"/g, '""')}"`,
+          `"${b.phone.replace(/"/g, '""')}"`,
+          `"${b.service.replace(/"/g, '""')}"`,
+          `"${b.location.replace(/"/g, '""')}"`,
+          `"${b.status}"`,
+          `"${b.technician.replace(/"/g, '""')}"`,
+          `"${b.estimatedCost}"`,
+          `"${b.time}"`
+        ].join(",");
+        csvContent += row + "\n";
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `fixowe_bookings_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     });
   }
 
