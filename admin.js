@@ -187,11 +187,30 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderBookings() {
     bookingsContainer.innerHTML = '';
 
+    // Duplicate Detection Algorithm
+    const phoneCounts = {};
+    bookingsData.forEach(b => {
+      const clean = b.phone.replace(/[^0-9]/g, '');
+      if (clean) phoneCounts[clean] = (phoneCounts[clean] || 0) + 1;
+    });
+
+    const duplicateCount = bookingsData.filter(b => {
+      const clean = b.phone.replace(/[^0-9]/g, '');
+      return clean && phoneCounts[clean] > 1;
+    }).length;
+
+    const elDuplicates = document.getElementById('count-duplicates');
+    if (elDuplicates) elDuplicates.textContent = duplicateCount;
+
     const filtered = bookingsData.filter(b => {
+      const clean = b.phone.replace(/[^0-9]/g, '');
+      const isDup = clean && phoneCounts[clean] > 1;
+
       const matchesFilter = (currentFilter === 'ALL') ||
         (currentFilter === 'NEW' && b.status === 'NEW') ||
         (currentFilter === 'IN_PROGRESS' && b.status === 'IN PROGRESS') ||
-        (currentFilter === 'COMPLETED' && b.status === 'COMPLETED');
+        (currentFilter === 'COMPLETED' && b.status === 'COMPLETED') ||
+        (currentFilter === 'DUPLICATES' && isDup);
 
       const matchesSearch = !searchQuery ||
         b.name.toLowerCase().includes(searchQuery) ||
@@ -230,11 +249,21 @@ document.addEventListener('DOMContentLoaded', () => {
       const card = document.createElement('div');
       card.className = 'card-item';
 
+      const cleanPh = b.phone.replace(/[^0-9]/g, '');
+      const isDup = cleanPh && phoneCounts[cleanPh] > 1;
+
       const techOptionsHtml = techniciansData.map(t => 
         `<option value="${t.name} (${t.role})" ${b.technician.includes(t.name) ? 'selected' : ''}>${t.name} (${t.role})</option>`
       ).join('');
 
       card.innerHTML = `
+        ${isDup ? `
+          <div style="background:#FEF2F2; border:1px solid #FCA5A5; color:#DC2626; padding:6px 10px; border-radius:6px; font-size:11px; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
+            <span>⚠️ POSSIBLY DUPLICATE LEAD (${phoneCounts[cleanPh]} submissions)</span>
+            <button style="background:#DC2626; color:#FFF; border:none; padding:3px 8px; border-radius:4px; font-size:10px; font-weight:700; cursor:pointer;" onclick="deleteDuplicateBooking('${b.id}')">Dismiss</button>
+          </div>
+        ` : ''}
+
         <div class="card-header">
           <div>
             <div class="client-title">${escapeHtml(b.name)}</div>
@@ -301,6 +330,16 @@ document.addEventListener('DOMContentLoaded', () => {
       techContainer.appendChild(card);
     });
   }
+
+  window.deleteDuplicateBooking = function(id) {
+    if (confirm("Are you sure you want to dismiss this duplicate lead?")) {
+      bookingsData = bookingsData.filter(b => b.id !== id);
+      if (typeof db !== 'undefined' && db) {
+        db.collection("bookings").doc(id).delete().catch(() => {});
+      }
+      renderBookings();
+    }
+  };
 
   window.updateBookingStatus = function(id, newStatus) {
     const booking = bookingsData.find(b => b.id === id);
