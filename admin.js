@@ -128,11 +128,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function checkAuthSession() {
     const token = sessionStorage.getItem('fixowe_secure_token');
+    const mainEls = document.querySelectorAll('header, .nav-tabs, .metric-bar, main, .fab-btn');
+    
     if (token && token.startsWith('ZERO_TRUST_JWT_')) {
       authOverlay.style.display = 'none';
+      mainEls.forEach(el => el.style.visibility = 'visible');
       initFirestoreListener();
     } else {
       authOverlay.style.display = 'flex';
+      mainEls.forEach(el => el.style.visibility = 'hidden');
     }
   }
 
@@ -194,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
   btnLogout.addEventListener('click', () => {
     sessionStorage.removeItem('fixowe_secure_token');
     clearTimeout(inactivityTimer);
-    authOverlay.style.display = 'flex';
+    checkAuthSession();
   });
 
   // TABS

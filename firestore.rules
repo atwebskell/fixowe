@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Customer Bookings Collection
+    match /bookings/{bookingId} {
+      // Allow any visitor to create a new booking
+      allow create: if request.resource.data.name != null && request.resource.data.phone != null;
+      
+      // Only authenticated admin users can read, update, or delete bookings
+      allow read, update, delete: if request.auth != null;
+    }
+
+    // Technician Roster Collection
+    match /technicians/{techId} {
+      // Only authenticated admin users can manage technicians
+      allow read, write: if request.auth != null;
+    }
+  }
+}
