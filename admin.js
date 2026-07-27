@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener(evt, resetInactivityTimer);
   });
 
-  // EXCLUSIVE GOOGLE OAUTH 2.0 FIREBASE AUTHENTICATION HANDLER
+  // STRICT GOOGLE OAUTH 2.0 FIREBASE AUTHENTICATION HANDLER
   const btnGoogleSignin = document.getElementById('btn-google-signin');
   if (btnGoogleSignin) {
     btnGoogleSignin.addEventListener('click', async () => {
@@ -184,18 +184,61 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
           }
         } catch (err) {
-          console.log("Google Auth Popup info:", err);
-          const secureToken = 'ZERO_TRUST_JWT_' + await sha256('firebase_authenticated_session_' + Date.now());
-          sessionStorage.setItem('fixowe_secure_token', secureToken);
-          resetInactivityTimer();
-          checkAuthSession();
+          console.error("Google Sign-In rejected:", err);
+          authErrorMsg.textContent = "Google Sign-In Failed: " + (err.message || "Access Denied.");
+          authErrorMsg.style.display = 'block';
+          if (authCardBox) {
+            authCardBox.classList.remove('shake');
+            void authCardBox.offsetWidth;
+            authCardBox.classList.add('shake');
+          }
           return;
         }
       }
 
-      const secureToken = 'ZERO_TRUST_JWT_' + await sha256('firebase_authenticated_session_' + Date.now());
-      sessionStorage.setItem('fixowe_secure_token', secureToken);
-      checkAuthSession();
+      authErrorMsg.textContent = "Google Sign-In initialized. Enable Google provider in Firebase Console.";
+      authErrorMsg.style.display = 'block';
+    });
+  }
+
+  // PASSCODE TOGGLE & SHAKE ANIMATIONS
+  const btnTogglePass = document.getElementById('btn-toggle-pass');
+  const adminPinInput = document.getElementById('admin-pin');
+  const authCardBox = document.getElementById('auth-card-box');
+
+  if (btnTogglePass && adminPinInput) {
+    btnTogglePass.addEventListener('click', () => {
+      const type = adminPinInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      adminPinInput.setAttribute('type', type);
+      btnTogglePass.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+  }
+
+  // STRICT OWNER PASSCODE LOGIN HANDLER
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('admin-email').value.trim();
+      const pin = document.getElementById('admin-pin').value.trim();
+
+      try {
+        await verifyAdminAuth(email, pin);
+        const secureToken = 'ZERO_TRUST_JWT_' + await sha256(email + Date.now());
+        sessionStorage.setItem('fixowe_secure_token', secureToken);
+        authOverlay.style.display = 'none';
+        authErrorMsg.style.display = 'none';
+        if (authCardBox) authCardBox.classList.remove('shake');
+        resetInactivityTimer();
+        checkAuthSession();
+      } catch (err) {
+        authErrorMsg.textContent = err.message;
+        authErrorMsg.style.display = 'block';
+        if (authCardBox) {
+          authCardBox.classList.remove('shake');
+          void authCardBox.offsetWidth;
+          authCardBox.classList.add('shake');
+        }
+      }
     });
   }
 

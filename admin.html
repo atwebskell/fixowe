@@ -690,7 +690,26 @@
         <span>Sign in with Google Account</span>
       </button>
 
-      <div id="auth-error-msg" class="auth-error" style="margin-top: 14px;"></div>
+      <div class="auth-divider">
+        <span>OR OWNER MASTER KEY</span>
+      </div>
+
+      <form id="admin-login-form">
+        <div class="form-group">
+          <label for="admin-email">Owner Email / Phone</label>
+          <input type="text" id="admin-email" class="form-control" placeholder="Enter owner email or phone" required autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label for="admin-pin">Master Passcode</label>
+          <div class="pass-input-wrapper">
+            <input type="password" id="admin-pin" class="form-control" placeholder="Enter owner passcode" required autocomplete="current-password" style="padding-right: 40px;" />
+            <button type="button" class="pass-toggle-btn" id="btn-toggle-pass" aria-label="Toggle password visibility">👁️</button>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary" id="btn-submit-auth">Sign In as Owner</button>
+      </form>
+
+      <div id="auth-error-msg" class="auth-error" style="margin-top: 14px; display: none;"></div>
     </div>
   </div>
 
