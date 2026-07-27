@@ -56,13 +56,50 @@
     #auth-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(9, 9, 11, 0.85);
-      backdrop-filter: blur(6px);
+      background: rgba(9, 9, 11, 0.88);
+      backdrop-filter: blur(8px);
       z-index: 9999;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
+    }
+
+    @keyframes shakeAuthCard {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-10px); }
+      40%, 80% { transform: translateX(10px); }
+    }
+    .auth-card.shake {
+      animation: shakeAuthCard 0.4s ease-in-out;
+    }
+    .pass-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .pass-toggle-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px;
+    }
+    .security-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 20px;
     }
 
     .auth-card {
@@ -590,21 +627,29 @@
 
   <!-- AUTHENTICATION GATE -->
   <div id="auth-overlay">
-    <div class="auth-card">
+    <div class="auth-card" id="auth-card-box">
       <img src="assets/transparent-logo-fixowe.png" alt="Fixowe Logo" class="auth-brand" />
-      <h2>Admin Control Portal</h2>
-      <p>Enter administrator credentials to access dashboard</p>
+      <h2>Fixowe Admin Portal</h2>
+      <p>Secure Enterprise Sign-In</p>
+
+      <div class="security-badge-pill">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Zero-Trust SHA-256 Protection</span>
+      </div>
 
       <form id="admin-login-form">
         <div class="form-group">
-          <label for="admin-email">Admin Email / Phone</label>
-          <input type="text" id="admin-email" class="form-control" placeholder="Enter admin email or phone" required />
+          <label for="admin-email">Admin Username / Phone</label>
+          <input type="text" id="admin-email" class="form-control" placeholder="admin@fixowe.com or phone" required autocomplete="username" />
         </div>
         <div class="form-group">
-          <label for="admin-pin">Passcode</label>
-          <input type="password" id="admin-pin" class="form-control" placeholder="Enter secure passcode" required />
+          <label for="admin-pin">Passcode / Master Key</label>
+          <div class="pass-input-wrapper">
+            <input type="password" id="admin-pin" class="form-control" placeholder="Enter secure passcode" required autocomplete="current-password" style="padding-right: 40px;" />
+            <button type="button" class="pass-toggle-btn" id="btn-toggle-pass" aria-label="Toggle password visibility">👁️</button>
+          </div>
         </div>
-        <button type="submit" class="btn-primary">Sign In to Dashboard</button>
+        <button type="submit" class="btn-primary" id="btn-submit-auth">Sign In to Dashboard</button>
         <div id="auth-error-msg" class="auth-error">Invalid credentials. Access Denied.</div>
       </form>
     </div>

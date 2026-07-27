@@ -136,6 +136,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // PASSCODE TOGGLE & SHAKE ANIMATIONS
+  const btnTogglePass = document.getElementById('btn-toggle-pass');
+  const adminPinInput = document.getElementById('admin-pin');
+  const authCardBox = document.getElementById('auth-card-box');
+
+  if (btnTogglePass && adminPinInput) {
+    btnTogglePass.addEventListener('click', () => {
+      const type = adminPinInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      adminPinInput.setAttribute('type', type);
+      btnTogglePass.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+  }
+
+  // AUTOMATED 15-MINUTE INACTIVITY AUTO-LOGOUT
+  let inactivityTimer;
+  function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+      if (sessionStorage.getItem('fixowe_secure_token')) {
+        sessionStorage.removeItem('fixowe_secure_token');
+        authOverlay.style.display = 'flex';
+        alert("Session Expired: Logged out due to 15 minutes of inactivity.");
+      }
+    }, 15 * 60 * 1000);
+  }
+
+  ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
+    window.addEventListener(evt, resetInactivityTimer);
+  });
+
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('admin-email').value.trim();
@@ -147,15 +177,23 @@ document.addEventListener('DOMContentLoaded', () => {
       sessionStorage.setItem('fixowe_secure_token', secureToken);
       authOverlay.style.display = 'none';
       authErrorMsg.style.display = 'none';
+      if (authCardBox) authCardBox.classList.remove('shake');
+      resetInactivityTimer();
       initFirestoreListener();
     } catch (err) {
       authErrorMsg.textContent = err.message;
       authErrorMsg.style.display = 'block';
+      if (authCardBox) {
+        authCardBox.classList.remove('shake');
+        void authCardBox.offsetWidth;
+        authCardBox.classList.add('shake');
+      }
     }
   });
 
   btnLogout.addEventListener('click', () => {
     sessionStorage.removeItem('fixowe_secure_token');
+    clearTimeout(inactivityTimer);
     authOverlay.style.display = 'flex';
   });
 
