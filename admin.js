@@ -567,6 +567,8 @@ document.addEventListener('DOMContentLoaded', () => {
     formCreateTech.reset();
   });
 
+  const DEMO_NAMES = ["rahul sharma", "anil kumar", "mohammed faisal"];
+
   function initFirestoreListener() {
     if (typeof db !== 'undefined' && db) {
       db.collection("bookings").onSnapshot((snapshot) => {
@@ -574,6 +576,12 @@ document.addEventListener('DOMContentLoaded', () => {
           if (change.type === "added") {
             const data = change.doc.data();
             const docId = change.doc.id;
+            const nameLower = (data.name || '').toLowerCase().trim();
+
+            if (docId.startsWith('doc_') || DEMO_NAMES.includes(nameLower)) {
+              return;
+            }
+
             if (!bookingsData.some(b => b.id === docId)) {
               bookingsData.unshift({
                 id: docId,
@@ -593,7 +601,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
       }, (error) => {
-        console.log("Firestore offline snapshot warning:", error);
+        console.log("Firestore snapshot info:", error);
       });
     }
   }
