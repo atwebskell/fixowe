@@ -31,10 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let failedLoginAttempts = 0;
   let lockoutUntil = 0;
 
-  // Secure Cryptographic Master Passcode Hashes
-  const HASH_FIXOWE_2026 = "4a4442c599e1e63d4e9e4667653126e2cf55ee10a05872566e9520d8420237e3"; // SHA-256 of "fixowe@2026"
-  const HASH_PIN_1234 = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // SHA-256 of "1234"
-  const HASH_FIXOWE2026 = "0734112c1beac7e14cbb5d0540ef305fafb99ac78cd9192b49cc5fa015463eec"; // SHA-256 of "fixowe2026"
+  // 100% Firebase Cloud User Authentication (Zero Hardcoded Passcodes)
 
   // Application Data (Clean Live Production State)
   let bookingsData = [];
@@ -59,30 +56,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (typeof firebase !== 'undefined' && firebase.auth) {
       try {
-        await firebase.auth().signInWithEmailAndPassword(email, pin);
-        failedLoginAttempts = 0;
-        return true;
-      } catch (e) {}
-    }
-
-    const inputHash = await sha256(pin);
-    const customHash = localStorage.getItem('fixowe_custom_admin_hash');
-    const validHashes = [HASH_FIXOWE_2026, HASH_PIN_1234, HASH_FIXOWE2026];
-    if (customHash) validHashes.push(customHash);
-
-    const cleanUser = email.toLowerCase().trim();
-    const isUserValid = cleanUser === 'admin@fixowe.com' || cleanUser === '6235780788' || cleanUser === 'admin' || cleanUser === 'ashfak' || cleanUser === 'owner';
-
-    if (isUserValid && validHashes.includes(inputHash)) {
-      failedLoginAttempts = 0;
-      return true;
-    } else {
-      failedLoginAttempts++;
-      if (failedLoginAttempts >= 3) {
-        lockoutUntil = Date.now() + (15 * 60 * 1000);
-        throw new Error("Security Alert: System locked for 15 minutes due to failed login attempts.");
+        const userCred = await firebase.auth().signInWithEmailAndPassword(email, pin);
+        if (userCred && userCred.user) {
+          failedLoginAttempts = 0;
+          return true;
+        }
+      } catch (err) {
+        failedLoginAttempts++;
+        if (failedLoginAttempts >= 3) {
+          lockoutUntil = Date.now() + (15 * 60 * 1000);
+          throw new Error("Security Alert: System locked for 15 minutes due to failed login attempts.");
+        }
+        throw new Error(err.message || `Invalid Firebase credentials (${failedLoginAttempts}/3 attempts).`);
       }
-      throw new Error(`Invalid credentials (${failedLoginAttempts}/3 attempts).`);
+    } else {
+      throw new Error("Firebase Auth SDK initializing... Please try again in a moment.");
     }
   }
 
@@ -410,76 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
   fabCreateLead.addEventListener('click', () => modalAddLead.classList.add('active'));
   btnOpenAddTech.addEventListener('click', () => modalAddTech.classList.add('active'));
 
-  // ADMIN PASSCODE & AUTHENTICATION SETTINGS
-  const btnAdminSecurity = document.getElementById('btn-admin-security');
-  const modalAdminSecurity = document.getElementById('modal-admin-security');
-  const formUpdatePasscode = document.getElementById('form-update-passcode');
-  const secStatusMsg = document.getElementById('sec-status-msg');
 
-  if (btnAdminSecurity) {
-    btnAdminSecurity.addEventListener('click', () => {
-      modalAdminSecurity.classList.add('active');
-    });
-  }
-
-  if (formUpdatePasscode) {
-    formUpdatePasscode.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const currentPin = document.getElementById('sec-current-pin').value.trim();
-      const newPin = document.getElementById('sec-new-pin').value.trim();
-      const confirmPin = document.getElementById('sec-confirm-pin').value.trim();
-
-      if (newPin !== confirmPin) {
-        secStatusMsg.style.color = "var(--red)";
-        secStatusMsg.textContent = "New passcodes do not match!";
-        secStatusMsg.style.display = "block";
-        return;
-      }
-
-      if (newPin.length < 4) {
-        secStatusMsg.style.color = "var(--red)";
-        secStatusMsg.textContent = "Passcode must be at least 4 characters long.";
-        secStatusMsg.style.display = "block";
-        return;
-      }
-
-      try {
-        const curHash = await sha256(currentPin);
-        const storedCustom = localStorage.getItem('fixowe_custom_admin_hash');
-        const validHashes = [HASH_FIXOWE_2026, HASH_PIN_1234, HASH_FIXOWE2026];
-        if (storedCustom) validHashes.push(storedCustom);
-
-        if (!validHashes.includes(curHash)) {
-          secStatusMsg.style.color = "var(--red)";
-          secStatusMsg.textContent = "Current passcode is incorrect!";
-          secStatusMsg.style.display = "block";
-          return;
-        }
-
-        const newHash = await sha256(newPin);
-        localStorage.setItem('fixowe_custom_admin_hash', newHash);
-
-        if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
-          await firebase.auth().currentUser.updatePassword(newPin).catch(() => {});
-        }
-
-        secStatusMsg.style.color = "var(--green)";
-        secStatusMsg.textContent = "Admin Passcode updated successfully!";
-        secStatusMsg.style.display = "block";
-        formUpdatePasscode.reset();
-
-        setTimeout(() => {
-          modalAdminSecurity.classList.remove('active');
-          secStatusMsg.style.display = "none";
-        }, 1500);
-
-      } catch (err) {
-        secStatusMsg.style.color = "var(--red)";
-        secStatusMsg.textContent = "Error updating passcode: " + err.message;
-        secStatusMsg.style.display = "block";
-      }
-    });
-  }
 
   // UNIVERSAL BULLETPROOF MODAL CLOSING LOGIC
   window.closeAllModals = function() {
