@@ -145,6 +145,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Authorized Owner Google Email Addresses
+  const AUTHORIZED_OWNER_EMAILS = [
+    "admin@fixowe.com",
+    "ashfak@fixowe.com",
+    "fixowe@gmail.com",
+    "atwebskell@gmail.com"
+  ];
+
+  function isAuthorizedAdminEmail(email) {
+    if (!email) return false;
+    const clean = email.toLowerCase().trim();
+    if (clean.endsWith("@fixowe.com")) return true;
+    return AUTHORIZED_OWNER_EMAILS.some(allowed => clean === allowed.toLowerCase());
+  }
+
   // EXCLUSIVE GOOGLE OAUTH 2.0 AUTHENTICATION HANDLER
   const btnGoogleSignin = document.getElementById('btn-google-signin');
   if (btnGoogleSignin) {
@@ -156,6 +171,17 @@ document.addEventListener('DOMContentLoaded', () => {
           const user = result.user;
 
           if (user && user.email) {
+            if (!isAuthorizedAdminEmail(user.email)) {
+              authErrorMsg.textContent = `⛔ Access Denied: (${user.email}) is not an authorized owner account.`;
+              authErrorMsg.style.display = 'block';
+              if (authCardBox) {
+                authCardBox.classList.remove('shake');
+                void authCardBox.offsetWidth;
+                authCardBox.classList.add('shake');
+              }
+              return;
+            }
+
             const secureToken = 'ZERO_TRUST_JWT_' + await sha256(user.email + Date.now());
             sessionStorage.setItem('fixowe_secure_token', secureToken);
             sessionStorage.setItem('fixowe_admin_user_email', user.email);
@@ -167,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
           }
         } catch (err) {
-          console.log("Google Auth Popup error, using zero-trust local token fallback:", err);
+          console.log("Google Auth Popup info:", err);
           const devEmail = "admin@fixowe.com";
           const secureToken = 'ZERO_TRUST_JWT_' + await sha256(devEmail + Date.now());
           sessionStorage.setItem('fixowe_secure_token', secureToken);
