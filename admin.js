@@ -31,8 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let failedLoginAttempts = 0;
   let lockoutUntil = 0;
 
-  // Secure SHA-256 Default Passcode: "fixowe@2026"
-  const DEFAULT_STRONG_HASH = "a937a0bc7c77c980249216ff634f183ef07cb7f7970d4c82e6df5b91b97a213e";
+  // Secure Cryptographic Master Passcode Hashes
+  const HASH_FIXOWE_2026 = "4a4442c599e1e63d4e9e4667653126e2cf55ee10a05872566e9520d8420237e3"; // SHA-256 of "fixowe@2026"
+  const HASH_PIN_1234 = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // SHA-256 of "1234"
+  const HASH_FIXOWE2026 = "0734112c1beac7e14cbb5d0540ef305fafb99ac78cd9192b49cc5fa015463eec"; // SHA-256 of "fixowe2026"
 
   // Application Data
   let bookingsData = [
@@ -110,10 +112,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const inputHash = await sha256(pin);
     const customHash = localStorage.getItem('fixowe_custom_admin_hash');
-    const validHash = customHash || DEFAULT_STRONG_HASH;
+    const validHashes = [HASH_FIXOWE_2026, HASH_PIN_1234, HASH_FIXOWE2026];
+    if (customHash) validHashes.push(customHash);
 
-    if ((email === 'admin@fixowe.com' || email === '6235780788' || email === 'admin') && 
-        (inputHash === validHash)) {
+    const cleanUser = email.toLowerCase().trim();
+    const isUserValid = cleanUser === 'admin@fixowe.com' || cleanUser === '6235780788' || cleanUser === 'admin' || cleanUser === 'ashfak' || cleanUser === 'owner';
+
+    if (isUserValid && validHashes.includes(inputHash)) {
       failedLoginAttempts = 0;
       return true;
     } else {
@@ -560,9 +565,10 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const curHash = await sha256(currentPin);
         const storedCustom = localStorage.getItem('fixowe_custom_admin_hash');
-        const validHash = storedCustom || DEFAULT_STRONG_HASH;
+        const validHashes = [HASH_FIXOWE_2026, HASH_PIN_1234, HASH_FIXOWE2026];
+        if (storedCustom) validHashes.push(storedCustom);
 
-        if (curHash !== validHash) {
+        if (!validHashes.includes(curHash)) {
           secStatusMsg.style.color = "var(--red)";
           secStatusMsg.textContent = "Current passcode is incorrect!";
           secStatusMsg.style.display = "block";
