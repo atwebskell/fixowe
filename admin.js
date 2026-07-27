@@ -162,45 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener(evt, resetInactivityTimer);
   });
 
-  // STRICT GOOGLE OAUTH 2.0 FIREBASE AUTHENTICATION HANDLER
-  const btnGoogleSignin = document.getElementById('btn-google-signin');
-  if (btnGoogleSignin) {
-    btnGoogleSignin.addEventListener('click', async () => {
-      if (typeof firebase !== 'undefined' && firebase.auth) {
-        try {
-          const provider = new firebase.auth.GoogleAuthProvider();
-          const result = await firebase.auth().signInWithPopup(provider);
-          const user = result.user;
-
-          if (user && user.uid) {
-            const secureToken = 'ZERO_TRUST_JWT_' + await sha256(user.uid + Date.now());
-            sessionStorage.setItem('fixowe_secure_token', secureToken);
-            sessionStorage.setItem('fixowe_admin_user_email', user.email || 'admin@fixowe.com');
-            authOverlay.style.display = 'none';
-            authErrorMsg.style.display = 'none';
-            if (authCardBox) authCardBox.classList.remove('shake');
-            resetInactivityTimer();
-            checkAuthSession();
-            return;
-          }
-        } catch (err) {
-          console.error("Google Sign-In rejected:", err);
-          authErrorMsg.textContent = "Google Sign-In Failed: " + (err.message || "Access Denied.");
-          authErrorMsg.style.display = 'block';
-          if (authCardBox) {
-            authCardBox.classList.remove('shake');
-            void authCardBox.offsetWidth;
-            authCardBox.classList.add('shake');
-          }
-          return;
-        }
-      }
-
-      authErrorMsg.textContent = "Google Sign-In initialized. Enable Google provider in Firebase Console.";
-      authErrorMsg.style.display = 'block';
-    });
-  }
-
   // PASSCODE TOGGLE & SHAKE ANIMATIONS
   const btnTogglePass = document.getElementById('btn-toggle-pass');
   const adminPinInput = document.getElementById('admin-pin');
