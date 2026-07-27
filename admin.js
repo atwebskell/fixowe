@@ -36,54 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const HASH_PIN_1234 = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; // SHA-256 of "1234"
   const HASH_FIXOWE2026 = "0734112c1beac7e14cbb5d0540ef305fafb99ac78cd9192b49cc5fa015463eec"; // SHA-256 of "fixowe2026"
 
-  // Application Data
-  let bookingsData = [
-    {
-      id: "doc_1",
-      name: "Rahul Sharma",
-      phone: "+916235780788",
-      service: "AC Repair & Servicing",
-      note: "Compressor not turning on. Water leaking from indoor unit.",
-      location: "Manjeri Town, Malappuram",
-      time: "Today, 11:20 AM",
-      status: "NEW",
-      photoUrl: "https://www.fixowe.com/assets/service_ac.png",
-      technician: "Ashfak S. (AC Lead)",
-      estimatedCost: "₹1,800"
-    },
-    {
-      id: "doc_2",
-      name: "Anil Kumar",
-      phone: "+919876543210",
-      service: "Commercial Cold Storage",
-      note: "Chiller unit temperature sensor fault in main market.",
-      location: "Market Road, Manjeri",
-      time: "Today, 10:45 AM",
-      status: "IN PROGRESS",
-      photoUrl: "https://www.fixowe.com/assets/service_cold.png",
-      technician: "Suhail M. (Cold Storage)",
-      estimatedCost: "₹4,500"
-    },
-    {
-      id: "doc_3",
-      name: "Mohammed Faisal",
-      phone: "+919745369331",
-      service: "Washing Machine Repair",
-      note: "Heavy vibration during high-speed spin cycle.",
-      location: "Pandikkad Road, Manjeri",
-      time: "Yesterday, 4:15 PM",
-      status: "COMPLETED",
-      photoUrl: "https://www.fixowe.com/assets/service_wash.png",
-      technician: "Ramesh K. (Appliance)",
-      estimatedCost: "₹950"
-    }
-  ];
-
-  let techniciansData = [
-    { id: "t1", name: "Ashfak S.", role: "AC Repair Lead", phone: "+916235780788", status: "AVAILABLE", activeJobs: 2 },
-    { id: "t2", name: "Suhail M.", role: "Cold Storage Specialist", phone: "+919876543210", status: "ON JOB", activeJobs: 1 },
-    { id: "t3", name: "Ramesh K.", role: "Appliance Technician", phone: "+919745369331", status: "AVAILABLE", activeJobs: 1 }
-  ];
+  // Application Data (Clean Live Production State)
+  let bookingsData = [];
+  let techniciansData = [];
 
   let currentFilter = "ALL";
   let searchQuery = "";
