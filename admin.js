@@ -145,6 +145,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // GOOGLE SIGN-IN OAUTH HANDLER
+  const btnGoogleSignin = document.getElementById('btn-google-signin');
+  if (btnGoogleSignin) {
+    btnGoogleSignin.addEventListener('click', async () => {
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          const result = await firebase.auth().signInWithPopup(provider);
+          const user = result.user;
+
+          if (user && user.email) {
+            const secureToken = 'ZERO_TRUST_JWT_' + await sha256(user.email + Date.now());
+            sessionStorage.setItem('fixowe_secure_token', secureToken);
+            authOverlay.style.display = 'none';
+            authErrorMsg.style.display = 'none';
+            if (authCardBox) authCardBox.classList.remove('shake');
+            resetInactivityTimer();
+            checkAuthSession();
+            return;
+          }
+        } catch (err) {
+          console.log("Google Auth Popup error:", err);
+          authErrorMsg.textContent = "Google Sign-In: " + (err.message || "Unauthorized account.");
+          authErrorMsg.style.display = 'block';
+          if (authCardBox) {
+            authCardBox.classList.remove('shake');
+            void authCardBox.offsetWidth;
+            authCardBox.classList.add('shake');
+          }
+          return;
+        }
+      }
+      
+      authErrorMsg.textContent = "Google Sign-In initialized. Connect Firebase domain in Google Cloud Console.";
+      authErrorMsg.style.display = 'block';
+    });
+  }
+
   // PASSCODE TOGGLE & SHAKE ANIMATIONS
   const btnTogglePass = document.getElementById('btn-toggle-pass');
   const adminPinInput = document.getElementById('admin-pin');
