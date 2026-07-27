@@ -569,7 +569,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const DEMO_NAMES = ["rahul sharma", "anil kumar", "mohammed faisal"];
 
+  function purgeDemoFirestoreDocs() {
+    if (typeof db !== 'undefined' && db) {
+      const demoDocIds = ['doc_1', 'doc_2', 'doc_3'];
+      demoDocIds.forEach(id => {
+        db.collection("bookings").doc(id).delete().catch(() => {});
+      });
+      db.collection("bookings").get().then(snapshot => {
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const nameLower = (data.name || '').toLowerCase().trim();
+          if (DEMO_NAMES.includes(nameLower)) {
+            doc.ref.delete().catch(() => {});
+          }
+        });
+      }).catch(() => {});
+    }
+  }
+
   function initFirestoreListener() {
+    purgeDemoFirestoreDocs();
     if (typeof db !== 'undefined' && db) {
       db.collection("bookings").onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
