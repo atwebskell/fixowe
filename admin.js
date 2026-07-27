@@ -89,14 +89,19 @@ document.addEventListener('DOMContentLoaded', () => {
   function checkAuthSession() {
     const token = sessionStorage.getItem('fixowe_secure_token');
     const mainEls = document.querySelectorAll('header, .nav-tabs, .metric-bar, main, .fab-btn');
-    
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasSecretKey = urlParams.get('access') === 'owner' || urlParams.get('key') === 'owner' || urlParams.get('pass') === 'ashfak' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
     if (token && token.startsWith('ZERO_TRUST_JWT_')) {
       authOverlay.style.display = 'none';
       mainEls.forEach(el => el.style.visibility = 'visible');
       initFirestoreListener();
-    } else {
+    } else if (hasSecretKey) {
       authOverlay.style.display = 'flex';
       mainEls.forEach(el => el.style.visibility = 'hidden');
+    } else {
+      // STEALTH SECURITY: Instantly redirect unauthorized visitors away to homepage!
+      window.location.href = 'index.html';
     }
   }
 
