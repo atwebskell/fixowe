@@ -145,6 +145,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // AUTOMATED INACTIVITY AUTO-LOGOUT
+  let inactivityTimer;
+  function resetInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+      if (sessionStorage.getItem('fixowe_secure_token')) {
+        sessionStorage.removeItem('fixowe_secure_token');
+        checkAuthSession();
+        alert("Session Expired: Logged out due to 15 minutes of inactivity.");
+      }
+    }, 15 * 60 * 1000);
+  }
+
+  ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt => {
+    window.addEventListener(evt, resetInactivityTimer);
+  });
+
   // Authorized Owner Google Email Addresses
   const AUTHORIZED_OWNER_EMAILS = [
     "admin@fixowe.com",
@@ -198,8 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
           const secureToken = 'ZERO_TRUST_JWT_' + await sha256(devEmail + Date.now());
           sessionStorage.setItem('fixowe_secure_token', secureToken);
           sessionStorage.setItem('fixowe_admin_user_email', devEmail);
-          authOverlay.style.display = 'none';
-          authErrorMsg.style.display = 'none';
           resetInactivityTimer();
           checkAuthSession();
           return;
