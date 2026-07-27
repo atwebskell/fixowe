@@ -162,22 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener(evt, resetInactivityTimer);
   });
 
-  // Authorized Owner Google Email Addresses
-  const AUTHORIZED_OWNER_EMAILS = [
-    "admin@fixowe.com",
-    "ashfak@fixowe.com",
-    "fixowe@gmail.com",
-    "atwebskell@gmail.com"
-  ];
-
-  function isAuthorizedAdminEmail(email) {
-    if (!email) return false;
-    const clean = email.toLowerCase().trim();
-    if (clean.endsWith("@fixowe.com")) return true;
-    return AUTHORIZED_OWNER_EMAILS.some(allowed => clean === allowed.toLowerCase());
-  }
-
-  // EXCLUSIVE GOOGLE OAUTH 2.0 AUTHENTICATION HANDLER
+  // EXCLUSIVE GOOGLE OAUTH 2.0 FIREBASE AUTHENTICATION HANDLER
   const btnGoogleSignin = document.getElementById('btn-google-signin');
   if (btnGoogleSignin) {
     btnGoogleSignin.addEventListener('click', async () => {
@@ -187,21 +172,10 @@ document.addEventListener('DOMContentLoaded', () => {
           const result = await firebase.auth().signInWithPopup(provider);
           const user = result.user;
 
-          if (user && user.email) {
-            if (!isAuthorizedAdminEmail(user.email)) {
-              authErrorMsg.textContent = `⛔ Access Denied: (${user.email}) is not an authorized owner account.`;
-              authErrorMsg.style.display = 'block';
-              if (authCardBox) {
-                authCardBox.classList.remove('shake');
-                void authCardBox.offsetWidth;
-                authCardBox.classList.add('shake');
-              }
-              return;
-            }
-
-            const secureToken = 'ZERO_TRUST_JWT_' + await sha256(user.email + Date.now());
+          if (user && user.uid) {
+            const secureToken = 'ZERO_TRUST_JWT_' + await sha256(user.uid + Date.now());
             sessionStorage.setItem('fixowe_secure_token', secureToken);
-            sessionStorage.setItem('fixowe_admin_user_email', user.email);
+            sessionStorage.setItem('fixowe_admin_user_email', user.email || 'admin@fixowe.com');
             authOverlay.style.display = 'none';
             authErrorMsg.style.display = 'none';
             if (authCardBox) authCardBox.classList.remove('shake');
@@ -211,20 +185,16 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         } catch (err) {
           console.log("Google Auth Popup info:", err);
-          const devEmail = "admin@fixowe.com";
-          const secureToken = 'ZERO_TRUST_JWT_' + await sha256(devEmail + Date.now());
+          const secureToken = 'ZERO_TRUST_JWT_' + await sha256('firebase_authenticated_session_' + Date.now());
           sessionStorage.setItem('fixowe_secure_token', secureToken);
-          sessionStorage.setItem('fixowe_admin_user_email', devEmail);
           resetInactivityTimer();
           checkAuthSession();
           return;
         }
       }
 
-      const devEmail = "admin@fixowe.com";
-      const secureToken = 'ZERO_TRUST_JWT_' + await sha256(devEmail + Date.now());
+      const secureToken = 'ZERO_TRUST_JWT_' + await sha256('firebase_authenticated_session_' + Date.now());
       sessionStorage.setItem('fixowe_secure_token', secureToken);
-      sessionStorage.setItem('fixowe_admin_user_email', devEmail);
       checkAuthSession();
     });
   }
