@@ -40,6 +40,18 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/favicon-192x192.png"
+  to = "/favicon-192x192.png"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/favicon-512x512.png"
+  to = "/favicon-512x512.png"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
