@@ -919,7 +919,7 @@
       <div class="auth-modal-body">
         <p class="auth-subtitle">Log in to track your service bookings, manage repairs, and get instant technical updates.</p>
 
-        <!-- Official Google Sign-In Button -->
+        <!-- Official Google Sign-In Button (Pure Google Authentication) -->
         <button class="btn-google-sign-in" id="btnGoogleSignIn">
           <svg viewBox="0 0 24 24" width="22" height="22">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -929,23 +929,7 @@
           </svg>
           <span>Continue with Google</span>
         </button>
-
-        <div class="auth-divider">
-          <span>or sign in with email</span>
-        </div>
-
-        <form id="formCustomerEmailAuth">
-          <div class="form-group">
-            <label>Email Address</label>
-            <input type="email" id="custAuthEmail" class="form-control" placeholder="name@example.com" required />
-          </div>
-          <div class="form-group">
-            <label>Password</label>
-            <input type="password" id="custAuthPassword" class="form-control" placeholder="••••••••" required />
-          </div>
-          <div id="custAuthErrorMsg" class="auth-error-msg" style="display:none;"></div>
-          <button type="submit" class="btn-primary" style="width:100%; margin-top:8px;">Sign In / Create Account</button>
-        </form>
+        <div id="custAuthErrorMsg" class="auth-error-msg" style="display:none; text-align:center; margin-top:12px;"></div>
       </div>
     </div>
   </div>
