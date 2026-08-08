@@ -500,6 +500,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnCustomerAccount) btnCustomerAccount.addEventListener('click', openAccountPortal);
   if (mobileBtnCustomerAccount) mobileBtnCustomerAccount.addEventListener('click', openAccountPortal);
 
+  // Global Click Delegation for Account Buttons
+  document.addEventListener('click', (e) => {
+    const accBtn = e.target.closest('#btnCustomerAccount, #mobileBtnCustomerAccount, .btn-account-nav');
+    if (accBtn) {
+      e.preventDefault();
+      openAccountPortal();
+    }
+  });
+
   if (btnCloseCustomerAuth) btnCloseCustomerAuth.addEventListener('click', () => modalCustomerAuth.classList.remove('active'));
   if (btnCloseCustomerDashboard) btnCloseCustomerDashboard.addEventListener('click', () => modalCustomerDashboard.classList.remove('active'));
 
