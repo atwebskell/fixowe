@@ -414,37 +414,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Format customer WhatsApp prefilled text (Includes Firebase Link if available)
-      let waText = `*New Service Booking*%0A`;
-      waText += `*Name:* ${name}%0A`;
-      waText += `*Phone:* ${phone}%0A`;
-      waText += `*Service:* ${service}%0A`;
-      if (message) waText += `*Note:* ${message}%0A`;
-      if (firebasePhotoUrl) {
-        waText += `*Photo Link:* ${encodeURIComponent(firebasePhotoUrl)}%0A`;
-      } else if (photoFile) {
-        waText += `*Machine Photo:* 📸 Sent directly to Fixowe Support!%0A`;
-      }
+      // Hide Booking Modal & Reset Form
+      closeModal();
+      bookingForm.reset();
+      if (photoPreviewContainer) photoPreviewContainer.style.display = 'none';
+      if (photoTitleText) photoTitleText.textContent = 'Attach Machine Photo (Optional)';
 
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      const waUrl = isMobile 
-        ? `whatsapp://send?phone=916235780788&text=${waText}`
-        : `https://api.whatsapp.com/send?phone=916235780788&text=${waText}`;
-      
-      window.open(waUrl, '_blank');
+      // Display Instant Booking Success Confirmation Modal (No WhatsApp Redirect)
+      const modalBookingSuccess = document.getElementById('modalBookingSuccess');
+      const succBookingRef = document.getElementById('succBookingRef');
+      const succBookingService = document.getElementById('succBookingService');
+
+      if (succBookingRef) succBookingRef.textContent = `#FX-${Math.floor(1000 + Math.random() * 9000)}`;
+      if (succBookingService) succBookingService.textContent = service;
+      if (modalBookingSuccess) modalBookingSuccess.classList.add('active');
+
     } catch (err) {
-      console.error('Telegram submission error:', err);
+      console.error('Submission notice:', err);
     } finally {
       if (btnSubmit) {
         btnSubmit.disabled = false;
         btnSubmit.innerHTML = originalBtnText;
       }
-      bookingForm.reset();
-      if (photoPreviewContainer) photoPreviewContainer.style.display = 'none';
-      if (photoTitleText) photoTitleText.textContent = 'Attach Machine Photo (Optional)';
-      closeModal();
     }
   });
+
+  // Success Modal Event Listeners
+  const modalBookingSuccess = document.getElementById('modalBookingSuccess');
+  const btnCloseSuccessModal = document.getElementById('btnCloseSuccessModal');
+  const btnViewLiveTracking = document.getElementById('btnViewLiveTracking');
+
+  if (btnCloseSuccessModal && modalBookingSuccess) {
+    btnCloseSuccessModal.addEventListener('click', () => {
+      modalBookingSuccess.classList.remove('active');
+    });
+  }
+
+  if (btnViewLiveTracking && modalBookingSuccess) {
+    btnViewLiveTracking.addEventListener('click', () => {
+      modalBookingSuccess.classList.remove('active');
+      openAccountPortal();
+    });
+  }
 
   // --- SUBMENU ACTIVE STATE TOGGLE ---
   const submenuItems = document.querySelectorAll('.submenu-item');

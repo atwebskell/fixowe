@@ -849,6 +849,37 @@
     </div>
   </div>
 
+  <!-- MODAL: BOOKING SUCCESS CONFIRMATION -->
+  <div class="modal-backdrop" id="modalBookingSuccess">
+    <div class="modal-box success-modal-box">
+      <div class="success-icon-box">
+        <svg viewBox="0 0 24 24" width="36" height="36"><path fill="#10B981" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      </div>
+      <h2 style="font-size:20px; font-weight:800; color:#0F172A; margin:12px 0 4px 0;">Booking Confirmed!</h2>
+      <p style="font-size:13px; color:#64748B; margin-bottom:16px;">Your service request has been registered successfully in our Manjeri dispatch system.</p>
+      
+      <div class="success-details-card">
+        <div class="success-row">
+          <span>Booking Reference:</span>
+          <strong id="succBookingRef">#FX-1001</strong>
+        </div>
+        <div class="success-row">
+          <span>Service:</span>
+          <strong id="succBookingService">AC Repair & Service</strong>
+        </div>
+        <div class="success-row">
+          <span>Dispatch Status:</span>
+          <strong style="color:#059669;">🟢 Technician Assigned</strong>
+        </div>
+      </div>
+
+      <div class="success-actions" style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+        <button class="btn-primary" id="btnViewLiveTracking" style="width:100%; padding:12px;">Track Status in My Account</button>
+        <button class="btn-secondary" id="btnCloseSuccessModal" style="width:100%; border:1px solid #CBD5E1; background:#F8FAFC; color:#334155; padding:10px; border-radius:8px; font-weight:600; cursor:pointer;">Done / Back to Website</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Quick Actions Sidebar (3-Dot Menu) -->
   <div class="more-sidebar" id="moreSidebar">
     <button class="sidebar-close" id="sidebarClose" aria-label="Close Sidebar">&times;</button>
