@@ -301,24 +301,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const message = document.getElementById('bookingNote').value.trim();
     const photoFile = bookingPhotoInput && bookingPhotoInput.files && bookingPhotoInput.files[0];
 
-    // --- FIREBASE STORAGE & FIRESTORE INTEGRATION ---
+    // --- INSTANT MACHINE PHOTO PROCESSING ---
     let firebasePhotoUrl = null;
-    if (typeof firebase !== 'undefined' && typeof storage !== 'undefined' && storage && photoFile) {
+    if (photoFile) {
       try {
-        const fileExt = photoFile.name.split('.').pop();
-        const storageRef = storage.ref(`machines/${Date.now()}_photo.${fileExt}`);
-        const snapshot = await storageRef.put(photoFile);
-        firebasePhotoUrl = await snapshot.ref.getDownloadURL();
-      } catch (fbErr) {
-        console.warn('Firebase Storage notice, using instant Base64 fallback:', fbErr);
-        try {
-          firebasePhotoUrl = await new Promise((res) => {
-            const reader = new FileReader();
-            reader.onload = e => res(e.target.result);
-            reader.onerror = () => res(null);
-            reader.readAsDataURL(photoFile);
-          });
-        } catch (rErr) {}
+        firebasePhotoUrl = await new Promise((res) => {
+          const reader = new FileReader();
+          reader.onload = e => res(e.target.result);
+          reader.onerror = () => res(null);
+          reader.readAsDataURL(photoFile);
+        });
+      } catch (fErr) {
+        console.warn('Photo processing notice:', fErr);
       }
     }
 
