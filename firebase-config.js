@@ -1,12 +1,12 @@
-// Firebase Production Configuration for Fixowe
+// Official Firebase Production Configuration for Fixowe (fixowe-95b17)
 const firebaseConfig = {
-  apiKey: "AIzaSyBY_zmOFHyYb1dHOR2-v-KtzKHe-4ckqTg",
-  authDomain: "fixowe.firebaseapp.com",
-  projectId: "fixowe",
-  storageBucket: "fixowe.firebasestorage.app",
-  messagingSenderId: "693207153969",
-  appId: "1:693207153969:web:3c176ea99f2425ca8d4410",
-  measurementId: "G-NM7QG06R43"
+  apiKey: "AIzaSyCOyivSYLlnBNknBbEcapC4NwuHj61tgsE",
+  authDomain: "fixowe-95b17.firebaseapp.com",
+  projectId: "fixowe-95b17",
+  storageBucket: "fixowe-95b17.firebasestorage.app",
+  messagingSenderId: "353088131210",
+  appId: "1:353088131210:web:5af84f1862296a87f8dd73",
+  measurementId: "G-MKNH4B1YXL"
 };
 
 // Initialize Firebase SDK
@@ -23,7 +23,7 @@ if (typeof firebase !== 'undefined') {
     }
     db = firebase.firestore();
     storage = firebase.storage();
-    console.log("Fixowe Firebase Production initialized successfully!");
+    console.log("Fixowe Firebase Production (fixowe-95b17) initialized successfully!");
   } catch (e) {
     console.error("Firebase Initialization Error:", e);
   }
