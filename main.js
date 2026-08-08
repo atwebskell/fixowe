@@ -316,14 +316,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (typeof firebase !== 'undefined' && typeof db !== 'undefined' && db) {
       try {
-        await db.collection('bookings').add({
-          name: name,
-          phone: phone,
-          service: service,
+        const newDoc = {
+          name,
+          phone,
+          service: selectedService,
           note: message,
-          photoUrl: firebasePhotoUrl || null,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+          email: currentAuthUser ? currentAuthUser.email : "",
+          uid: currentAuthUser ? currentAuthUser.uid : "",
+          photoUrl: firebasePhotoUrl,
+          status: "NEW",
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        await db.collection('bookings').add(newDoc);
       } catch (dbErr) {
         console.warn('Firestore database notice:', dbErr);
       }
@@ -469,6 +473,204 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     sidebarClose.addEventListener('click', closeSidebar);
     sidebarOverlay.addEventListener('click', closeSidebar);
+  }
+
+  // --- CUSTOMER GOOGLE AUTHENTICATION & ACCOUNT DASHBOARD ---
+  let currentAuthUser = null;
+
+  const btnCustomerAccount = document.getElementById('btnCustomerAccount');
+  const mobileBtnCustomerAccount = document.getElementById('mobileBtnCustomerAccount');
+  const modalCustomerAuth = document.getElementById('modalCustomerAuth');
+  const modalCustomerDashboard = document.getElementById('modalCustomerDashboard');
+  const btnCloseCustomerAuth = document.getElementById('btnCloseCustomerAuth');
+  const btnCloseCustomerDashboard = document.getElementById('btnCloseCustomerDashboard');
+  const btnGoogleSignIn = document.getElementById('btnGoogleSignIn');
+  const btnCustomerSignOut = document.getElementById('btnCustomerSignOut');
+  const formCustomerEmailAuth = document.getElementById('formCustomerEmailAuth');
+  const custAuthErrorMsg = document.getElementById('custAuthErrorMsg');
+
+  function openAccountPortal() {
+    if (currentAuthUser) {
+      if (modalCustomerDashboard) modalCustomerDashboard.classList.add('active');
+    } else {
+      if (modalCustomerAuth) modalCustomerAuth.classList.add('active');
+    }
+  }
+
+  if (btnCustomerAccount) btnCustomerAccount.addEventListener('click', openAccountPortal);
+  if (mobileBtnCustomerAccount) mobileBtnCustomerAccount.addEventListener('click', openAccountPortal);
+
+  if (btnCloseCustomerAuth) btnCloseCustomerAuth.addEventListener('click', () => modalCustomerAuth.classList.remove('active'));
+  if (btnCloseCustomerDashboard) btnCloseCustomerDashboard.addEventListener('click', () => modalCustomerDashboard.classList.remove('active'));
+
+  // Google Sign-In Handler
+  if (btnGoogleSignIn) {
+    btnGoogleSignIn.addEventListener('click', async () => {
+      if (typeof firebase === 'undefined' || !firebase.auth) {
+        alert("Firebase Auth SDK initializing... Please try again.");
+        return;
+      }
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await firebase.auth().signInWithPopup(provider);
+        if (modalCustomerAuth) modalCustomerAuth.classList.remove('active');
+        if (modalCustomerDashboard) modalCustomerDashboard.classList.add('active');
+      } catch (err) {
+        console.error("Google Sign-In Error:", err);
+        if (custAuthErrorMsg) {
+          custAuthErrorMsg.textContent = err.message || "Google sign in failed.";
+          custAuthErrorMsg.style.display = "block";
+        }
+      }
+    });
+  }
+
+  // Email/Password Sign-In & Registration
+  if (formCustomerEmailAuth) {
+    formCustomerEmailAuth.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('custAuthEmail').value.trim();
+      const pass = document.getElementById('custAuthPassword').value.trim();
+      if (custAuthErrorMsg) custAuthErrorMsg.style.display = "none";
+
+      try {
+        await firebase.auth().signInWithEmailAndPassword(email, pass);
+        if (modalCustomerAuth) modalCustomerAuth.classList.remove('active');
+        if (modalCustomerDashboard) modalCustomerDashboard.classList.add('active');
+      } catch (err) {
+        if (err.code === 'auth/user-not-found') {
+          try {
+            await firebase.auth().createUserWithEmailAndPassword(email, pass);
+            if (modalCustomerAuth) modalCustomerAuth.classList.remove('active');
+            if (modalCustomerDashboard) modalCustomerDashboard.classList.add('active');
+          } catch (createErr) {
+            if (custAuthErrorMsg) {
+              custAuthErrorMsg.textContent = createErr.message;
+              custAuthErrorMsg.style.display = "block";
+            }
+          }
+        } else {
+          if (custAuthErrorMsg) {
+            custAuthErrorMsg.textContent = err.message;
+            custAuthErrorMsg.style.display = "block";
+          }
+        }
+      }
+    });
+  }
+
+  // Sign Out Handler
+  if (btnCustomerSignOut) {
+    btnCustomerSignOut.addEventListener('click', () => {
+      if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().signOut().then(() => {
+          if (modalCustomerDashboard) modalCustomerDashboard.classList.remove('active');
+        });
+      }
+    });
+  }
+
+  // Firebase Auth State Listener
+  if (typeof firebase !== 'undefined' && firebase.auth) {
+    firebase.auth().onAuthStateChanged((user) => {
+      currentAuthUser = user;
+      updateAuthUI(user);
+      if (user) fetchCustomerBookings(user);
+    });
+  }
+
+  function updateAuthUI(user) {
+    const navAccountLabel = document.getElementById('navAccountLabel');
+    const mobileNavAccountLabel = document.getElementById('mobileNavAccountLabel');
+    const userAvatarImg = document.getElementById('userAvatarImg');
+    const mobileUserAvatarImg = document.getElementById('mobileUserAvatarImg');
+    const userAccountIcon = document.getElementById('userAccountIcon');
+    const mobileUserAccountIcon = document.getElementById('mobileUserAccountIcon');
+    const dashUserName = document.getElementById('dashUserName');
+    const dashUserEmail = document.getElementById('dashUserEmail');
+    const dashUserAvatar = document.getElementById('dashUserAvatar');
+
+    if (user) {
+      const displayName = user.displayName || user.email.split('@')[0];
+      const photoURL = user.photoURL || 'assets/favicon-optimized.png';
+
+      if (navAccountLabel) navAccountLabel.textContent = displayName.split(' ')[0];
+      if (mobileNavAccountLabel) mobileNavAccountLabel.textContent = displayName.split(' ')[0];
+
+      if (userAvatarImg) {
+        userAvatarImg.src = photoURL;
+        userAvatarImg.style.display = 'inline-block';
+      }
+      if (mobileUserAvatarImg) {
+        mobileUserAvatarImg.src = photoURL;
+        mobileUserAvatarImg.style.display = 'inline-block';
+      }
+      if (userAccountIcon) userAccountIcon.style.display = 'none';
+      if (mobileUserAccountIcon) mobileUserAccountIcon.style.display = 'none';
+
+      if (dashUserName) dashUserName.textContent = displayName;
+      if (dashUserEmail) dashUserEmail.textContent = user.email;
+      if (dashUserAvatar) dashUserAvatar.src = photoURL;
+
+      const inputName = document.getElementById('inputName');
+      if (inputName && !inputName.value) inputName.value = displayName;
+    } else {
+      if (navAccountLabel) navAccountLabel.textContent = 'Sign In';
+      if (mobileNavAccountLabel) mobileNavAccountLabel.textContent = 'Account';
+
+      if (userAvatarImg) userAvatarImg.style.display = 'none';
+      if (mobileUserAvatarImg) mobileUserAvatarImg.style.display = 'none';
+      if (userAccountIcon) userAccountIcon.style.display = 'inline-block';
+      if (mobileUserAccountIcon) mobileUserAccountIcon.style.display = 'inline-block';
+    }
+  }
+
+  function fetchCustomerBookings(user) {
+    const custBookingsList = document.getElementById('custBookingsList');
+    if (!custBookingsList || typeof db === 'undefined' || !db) return;
+
+    custBookingsList.innerHTML = '<p style="text-align:center; font-size:13px; color:#64748B;">Fetching active service requests...</p>';
+
+    db.collection('bookings')
+      .where('email', '==', user.email)
+      .onSnapshot((snapshot) => {
+        if (snapshot.empty) {
+          custBookingsList.innerHTML = `
+            <div class="cust-empty-state">
+              <p style="font-size:14px; font-weight:600; margin-bottom:4px;">No active service requests found</p>
+              <p style="font-size:12px; margin-bottom:14px;">Book an emergency AC repair or cold storage service to track technician status in real-time.</p>
+            </div>
+          `;
+          return;
+        }
+
+        let html = '';
+        snapshot.forEach((doc) => {
+          const b = doc.data();
+          const statusClass = (b.status || 'NEW').replace(/\s+/g, '_');
+          html += `
+            <div class="cust-booking-card">
+              <div class="card-top-bar">
+                <span class="cust-service-title">${escapeHtml(b.service || 'AC Service')}</span>
+                <span class="cust-status-tag ${statusClass}">${escapeHtml(b.status || 'NEW')}</span>
+              </div>
+              <div class="card-details-row">
+                <span>📍 ${escapeHtml(b.location || 'Manjeri')}</span>
+                <span>👤 Tech: <strong>${escapeHtml(b.technician || 'Unassigned')}</strong></span>
+              </div>
+              ${b.note ? `<p style="font-size:12px; color:#475569; margin:4px 0 0 0; font-style:italic;">"${escapeHtml(b.note)}"</p>` : ''}
+            </div>
+          `;
+        });
+
+        custBookingsList.innerHTML = html;
+      }, (err) => {
+        custBookingsList.innerHTML = `<p style="text-align:center; font-size:12px; color:#EF4444;">Unable to load bookings: ${err.message}</p>`;
+      });
+  }
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 });
 
