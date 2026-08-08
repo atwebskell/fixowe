@@ -712,7 +712,7 @@
   <!-- NAVIGATION TABS -->
   <div class="nav-tabs">
     <button class="tab-item active" data-tab="tab-bookings">Service Bookings</button>
-    <button class="tab-item" data-tab="tab-customers">Registered Clients</button>
+    <button class="tab-item" data-tab="tab-admin-team">Admin Team & Roles</button>
     <button class="tab-item" data-tab="tab-technicians">Technician Roster</button>
   </div>
 
@@ -749,7 +749,22 @@
       </div>
     </section>
 
-    <!-- TAB 2: TECHNICIANS -->
+    <!-- TAB 2: ADMIN TEAM & ROLES -->
+    <section id="tab-admin-team" class="view-panel">
+      <div class="toolbar">
+        <div>
+          <h2 style="font-size:15px; font-weight:700; letter-spacing:-0.01em;">Authorized Admin Team</h2>
+          <p style="font-size:12px; color:var(--text-muted);">Manage Google Accounts authorized to access Admin Portal</p>
+        </div>
+        <button class="btn-secondary" id="btn-open-add-admin" style="background:var(--text-main); color:#FFF; border:none;">+ Add New Admin</button>
+      </div>
+
+      <div class="cards-grid" id="admins-container">
+        <!-- Rendered via JS -->
+      </div>
+    </section>
+
+    <!-- TAB 3: TECHNICIANS -->
     <section id="tab-technicians" class="view-panel">
       <div class="toolbar">
         <div>
@@ -760,24 +775,6 @@
       </div>
 
       <div class="cards-grid" id="tech-container">
-        <!-- Rendered via JS -->
-      </div>
-    </section>
-
-    <!-- TAB 3: REGISTERED CUSTOMERS -->
-    <section id="tab-customers" class="view-panel">
-      <div class="toolbar">
-        <div>
-          <h2 style="font-size:15px; font-weight:700; letter-spacing:-0.01em;">Signed-Up Customers & Accounts</h2>
-          <p style="font-size:12px; color:var(--text-muted);">Verified Google Accounts & Client Booking Histories</p>
-        </div>
-        <div class="search-box" style="width:260px;">
-          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-          <input type="text" id="search-customers-input" placeholder="Search customer email or name..." />
-        </div>
-      </div>
-
-      <div class="cards-grid" id="customers-container">
         <!-- Rendered via JS -->
       </div>
     </section>
@@ -825,18 +822,47 @@
       </div>
       <form id="form-create-tech">
         <div class="form-group">
-          <label>Technician Name</label>
-          <input type="text" id="tech-name" class="form-control" required />
-        </div>
-        <div class="form-group">
-          <label>Custom Designation / Post</label>
-          <input type="text" id="tech-role" class="form-control" required />
+          <label>Technician Full Name</label>
+          <input type="text" id="techName" class="form-control" placeholder="e.g. Ashfak S." required />
         </div>
         <div class="form-group">
           <label>Phone Number</label>
-          <input type="tel" id="tech-phone" class="form-control" required />
+          <input type="tel" id="techPhone" class="form-control" placeholder="10-digit mobile number" required pattern="[0-9]{10}" />
         </div>
-        <button type="submit" class="btn-primary">Add Technician</button>
+        <div class="form-group">
+          <label>Role / Title</label>
+          <input type="text" id="techRole" class="form-control" placeholder="e.g. AC Senior Specialist" required />
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%; margin-top:8px;">Add Technician</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD ADMIN -->
+  <div class="modal-backdrop" id="modal-add-admin">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div class="modal-title">Authorize New Admin Account</div>
+        <button class="modal-close" data-close="modal-add-admin">&times;</button>
+      </div>
+      <form id="form-create-admin">
+        <div class="form-group">
+          <label>Google Account Email</label>
+          <input type="email" id="newAdminEmail" class="form-control" placeholder="admin@gmail.com" required />
+        </div>
+        <div class="form-group">
+          <label>Admin Full Name</label>
+          <input type="text" id="newAdminName" class="form-control" placeholder="Admin Full Name" required />
+        </div>
+        <div class="form-group">
+          <label>Role / Designation</label>
+          <select id="newAdminRole" class="form-control" required>
+            <option value="Super Admin">Super Admin</option>
+            <option value="Dispatch Manager">Dispatch Manager</option>
+            <option value="Operations Supervisor">Operations Supervisor</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%; margin-top:8px;">Grant Admin Access</button>
       </form>
     </div>
   </div>
