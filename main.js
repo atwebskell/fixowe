@@ -310,7 +310,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const snapshot = await storageRef.put(photoFile);
         firebasePhotoUrl = await snapshot.ref.getDownloadURL();
       } catch (fbErr) {
-        console.warn('Firebase Storage notice:', fbErr);
+        console.warn('Firebase Storage notice, using instant Base64 fallback:', fbErr);
+        try {
+          firebasePhotoUrl = await new Promise((res) => {
+            const reader = new FileReader();
+            reader.onload = e => res(e.target.result);
+            reader.onerror = () => res(null);
+            reader.readAsDataURL(photoFile);
+          });
+        } catch (rErr) {}
       }
     }
 
