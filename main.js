@@ -681,49 +681,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
     custBookingsList.innerHTML = '<p style="text-align:center; font-size:13px; color:#64748B;">Fetching active service requests...</p>';
 
-    db.collection('bookings')
-      .where('email', '==', user.email)
-      .onSnapshot((snapshot) => {
-        if (custStatTotal) custStatTotal.textContent = snapshot.size;
+    try {
+      db.collection('bookings')
+        .where('email', '==', user.email)
+        .onSnapshot((snapshot) => {
+          if (custStatTotal) custStatTotal.textContent = snapshot.size;
 
-        if (snapshot.empty) {
-          if (custStatActive) custStatActive.textContent = "0";
-          custBookingsList.innerHTML = `
-            <div class="cust-empty-state">
-              <p style="font-size:14px; font-weight:600; margin-bottom:4px;">No active service requests found</p>
-              <p style="font-size:12px; margin-bottom:14px;">Book an emergency AC repair or cold storage service to track technician status in real-time.</p>
-            </div>
-          `;
-          return;
-        }
-
-        let activeCount = 0;
-        let html = '';
-        snapshot.forEach((doc) => {
-          const b = doc.data();
-          const statusClass = (b.status || 'NEW').replace(/\s+/g, '_');
-          if (b.status !== 'COMPLETED') activeCount++;
-
-          html += `
-            <div class="cust-booking-card">
-              <div class="card-top-bar">
-                <span class="cust-service-title">${escapeHtml(b.service || 'AC Service')}</span>
-                <span class="cust-status-tag ${statusClass}">${escapeHtml(b.status || 'NEW')}</span>
+          if (snapshot.empty) {
+            if (custStatActive) custStatActive.textContent = "0";
+            custBookingsList.innerHTML = `
+              <div class="cust-empty-state">
+                <p style="font-size:14px; font-weight:600; margin-bottom:4px;">No active service requests found</p>
+                <p style="font-size:12px; margin-bottom:14px;">Book an emergency AC repair or cold storage service to track technician status in real-time.</p>
               </div>
-              <div class="card-details-row">
-                <span>📍 ${escapeHtml(b.location || 'Manjeri')}</span>
-                <span>👤 Tech: <strong>${escapeHtml(b.technician || 'Unassigned')}</strong></span>
+            `;
+            return;
+          }
+
+          let activeCount = 0;
+          let html = '';
+          snapshot.forEach((doc) => {
+            const b = doc.data();
+            const statusClass = (b.status || 'NEW').replace(/\s+/g, '_');
+            if (b.status !== 'COMPLETED') activeCount++;
+
+            html += `
+              <div class="cust-booking-card">
+                <div class="card-top-bar">
+                  <span class="cust-service-title">${escapeHtml(b.service || 'AC Service')}</span>
+                  <span class="cust-status-tag ${statusClass}">${escapeHtml(b.status || 'NEW')}</span>
+                </div>
+                <div class="card-details-row">
+                  <span>📍 ${escapeHtml(b.location || 'Manjeri')}</span>
+                  <span>👤 Tech: <strong>${escapeHtml(b.technician || 'Unassigned')}</strong></span>
+                </div>
+                ${b.note ? `<p style="font-size:12px; color:#475569; margin:4px 0 0 0; font-style:italic;">"${escapeHtml(b.note)}"</p>` : ''}
               </div>
-              ${b.note ? `<p style="font-size:12px; color:#475569; margin:4px 0 0 0; font-style:italic;">"${escapeHtml(b.note)}"</p>` : ''}
-            </div>
-          `;
+            `;
+          });
+
+          if (custStatActive) custStatActive.textContent = activeCount;
+          custBookingsList.innerHTML = html;
+        }, (err) => {
+          console.warn("Firestore customer bookings notice:", err.message);
+          if (custBookingsList) {
+            custBookingsList.innerHTML = `
+              <div class="cust-empty-state">
+                <p style="font-size:14px; font-weight:600; margin-bottom:4px;">Service Tracker Ready</p>
+                <p style="font-size:12px;">Submit your first booking to view real-time technician status.</p>
+              </div>
+            `;
+          }
         });
-
-        if (custStatActive) custStatActive.textContent = activeCount;
-        custBookingsList.innerHTML = html;
-      }, (err) => {
-        custBookingsList.innerHTML = `<p style="text-align:center; font-size:12px; color:#EF4444;">Unable to load bookings: ${err.message}</p>`;
-      });
+    } catch (e) {
+      console.warn("Firestore not initialized:", e.message);
+    }
   }
 
   function escapeHtml(str) {
