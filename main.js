@@ -660,8 +660,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // Customer Dashboard Inner Tabs
+  document.querySelectorAll('.cust-tab-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('.cust-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.cust-panel').forEach(p => p.style.display = 'none');
+
+      e.currentTarget.classList.add('active');
+      const targetId = e.currentTarget.getAttribute('data-cust-tab');
+      const targetPanel = document.getElementById(targetId);
+      if (targetPanel) targetPanel.style.display = 'block';
+    });
+  });
+
   function fetchCustomerBookings(user) {
     const custBookingsList = document.getElementById('custBookingsList');
+    const custStatTotal = document.getElementById('custStatTotal');
+    const custStatActive = document.getElementById('custStatActive');
     if (!custBookingsList || typeof db === 'undefined' || !db) return;
 
     custBookingsList.innerHTML = '<p style="text-align:center; font-size:13px; color:#64748B;">Fetching active service requests...</p>';
@@ -669,7 +684,10 @@ document.addEventListener('DOMContentLoaded', () => {
     db.collection('bookings')
       .where('email', '==', user.email)
       .onSnapshot((snapshot) => {
+        if (custStatTotal) custStatTotal.textContent = snapshot.size;
+
         if (snapshot.empty) {
+          if (custStatActive) custStatActive.textContent = "0";
           custBookingsList.innerHTML = `
             <div class="cust-empty-state">
               <p style="font-size:14px; font-weight:600; margin-bottom:4px;">No active service requests found</p>
@@ -679,10 +697,13 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
+        let activeCount = 0;
         let html = '';
         snapshot.forEach((doc) => {
           const b = doc.data();
           const statusClass = (b.status || 'NEW').replace(/\s+/g, '_');
+          if (b.status !== 'COMPLETED') activeCount++;
+
           html += `
             <div class="cust-booking-card">
               <div class="card-top-bar">
@@ -698,6 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
           `;
         });
 
+        if (custStatActive) custStatActive.textContent = activeCount;
         custBookingsList.innerHTML = html;
       }, (err) => {
         custBookingsList.innerHTML = `<p style="text-align:center; font-size:12px; color:#EF4444;">Unable to load bookings: ${err.message}</p>`;

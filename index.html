@@ -934,36 +934,90 @@
     </div>
   </div>
 
-  <!-- MODAL: CUSTOMER ACCOUNT & LIVE BOOKINGS DASHBOARD -->
+  <!-- MODAL: PREMIUM CUSTOMER ACCOUNT DASHBOARD -->
   <div class="modal-backdrop" id="modalCustomerDashboard">
     <div class="modal-box customer-dashboard-box">
       <div class="modal-head">
-        <div class="modal-title">My Account & Bookings</div>
+        <div class="modal-title-group">
+          <span class="badge-cust-portal">FIXOWE CLIENT PORTAL</span>
+          <h2 class="cust-dash-title">Customer Account Dashboard</h2>
+        </div>
         <button class="modal-close" id="btnCloseCustomerDashboard">&times;</button>
       </div>
+      
       <div class="account-dashboard-body">
-        <!-- Customer Profile Card Header -->
-        <div class="cust-profile-header">
-          <div class="cust-avatar-box">
-            <img id="dashUserAvatar" src="assets/favicon-optimized.png" alt="User Profile" />
+        <!-- Premium Profile Banner Header -->
+        <div class="cust-profile-banner">
+          <div class="profile-left">
+            <div class="cust-avatar-wrapper">
+              <img id="dashUserAvatar" src="assets/favicon-optimized.png" alt="Google Profile" />
+              <span class="verified-badge" title="Verified Customer">✓</span>
+            </div>
+            <div class="cust-details">
+              <div class="name-row">
+                <h3 id="dashUserName">Customer Name</h3>
+                <span class="google-tag">Google Verified</span>
+              </div>
+              <p id="dashUserEmail">customer@example.com</p>
+            </div>
           </div>
-          <div class="cust-info">
-            <h3 id="dashUserName">Customer Name</h3>
-            <p id="dashUserEmail">customer@example.com</p>
-          </div>
-          <button class="btn-cust-logout" id="btnCustomerSignOut" title="Sign Out">Sign Out</button>
+          <button class="btn-cust-logout" id="btnCustomerSignOut" title="Sign Out">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            Sign Out
+          </button>
         </div>
 
-        <!-- Dashboard Action Toolbar -->
-        <div class="cust-dash-toolbar">
-          <h4 style="font-size:14px; font-weight:700; color:var(--text-dark);">Active Service Requests</h4>
-          <button class="btn-small-cta btn-book-trigger">+ New Service Request</button>
+        <!-- Quick Stats Summary Bar -->
+        <div class="cust-stats-bar">
+          <div class="stat-pill">
+            <span class="stat-num" id="custStatTotal">0</span>
+            <span class="stat-label">Total Requests</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-num" id="custStatActive" style="color:#D97706">0</span>
+            <span class="stat-label">Active Repairs</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-num" style="color:#059669">30 Days</span>
+            <span class="stat-label">Service Warranty</span>
+          </div>
         </div>
 
-        <!-- Customer Live Bookings List Container -->
-        <div class="cust-bookings-list" id="custBookingsList">
-          <!-- Rendered dynamically via JS -->
+        <!-- Navigation Tabs inside Account Modal -->
+        <div class="cust-tab-bar">
+          <button class="cust-tab-btn active" data-cust-tab="tab-cust-bookings">Active Bookings</button>
+          <button class="cust-tab-btn" data-cust-tab="tab-cust-profile">Account Details</button>
         </div>
+
+        <!-- TAB 1: BOOKINGS LIST -->
+        <div id="tab-cust-bookings" class="cust-panel active">
+          <div class="cust-dash-toolbar">
+            <h4 style="font-size:13.5px; font-weight:700; color:#0F172A;">Your Service Requests & Tracking</h4>
+            <button class="btn-small-cta btn-book-trigger">+ Book New Service</button>
+          </div>
+          <div class="cust-bookings-list" id="custBookingsList">
+            <!-- Rendered dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- TAB 2: ACCOUNT DETAILS -->
+        <div id="tab-cust-profile" class="cust-panel" style="display:none;">
+          <div class="cust-profile-info-grid">
+            <div class="info-card">
+              <span class="info-label">Account Provider</span>
+              <span class="info-val">Google Authentication</span>
+            </div>
+            <div class="info-card">
+              <span class="info-label">Service Region</span>
+              <span class="info-val">Manjeri, Malappuram & Kerala</span>
+            </div>
+            <div class="info-card">
+              <span class="info-label">Emergency Helpline</span>
+              <span class="info-val">+91 62357 80788</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
