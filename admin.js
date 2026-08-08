@@ -559,6 +559,72 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // RENDER REGISTERED CLIENTS & ACCOUNTS
+  function renderCustomers() {
+    const customersContainer = document.getElementById('customers-container');
+    const searchCustomersInput = document.getElementById('search-customers-input');
+    if (!customersContainer) return;
+
+    const query = searchCustomersInput ? searchCustomersInput.value.trim().toLowerCase() : '';
+
+    const customerMap = {};
+
+    bookingsData.forEach(b => {
+      const email = (b.email || 'guest@fixowe.com').toLowerCase();
+      if (!customerMap[email]) {
+        customerMap[email] = {
+          name: b.name || 'Registered Customer',
+          email: b.email || 'No email associated',
+          phone: b.phone || 'N/A',
+          location: b.location || 'Manjeri',
+          totalBookings: 0,
+          lastActive: b.time || 'Recently',
+          photoUrl: 'assets/favicon-optimized.png'
+        };
+      }
+      customerMap[email].totalBookings++;
+    });
+
+    const customers = Object.values(customerMap).filter(c => {
+      return !query || 
+        c.name.toLowerCase().includes(query) || 
+        c.email.toLowerCase().includes(query) || 
+        c.phone.toLowerCase().includes(query) ||
+        c.location.toLowerCase().includes(query);
+    });
+
+    if (customers.length === 0) {
+      customersContainer.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-muted);">No registered clients match your search.</div>`;
+      return;
+    }
+
+    let html = '';
+    customers.forEach(c => {
+      const cleanPhone = c.phone.replace(/[^0-9]/g, '');
+      html += `
+        <div class="card-item" style="border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: #FFF;">
+          <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+            <img src="${escapeHtml(c.photoUrl)}" style="width:42px; height:42px; border-radius:50%; object-fit:cover; border:2px solid var(--border);" alt="Client Avatar" />
+            <div>
+              <div style="font-weight:700; font-size:15px; color:var(--text-main);">${escapeHtml(c.name)}</div>
+              <div style="font-size:12px; color:var(--text-muted);">${escapeHtml(c.email)}</div>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); padding:8px 0; border-top:1px solid var(--border-subtle);">
+            <span>📍 ${escapeHtml(c.location)}</span>
+            <span>📦 Total Bookings: <strong style="color:var(--text-main);">${c.totalBookings}</strong></span>
+          </div>
+          <div class="card-actions" style="margin-top:10px;">
+            ${cleanPhone ? `<a href="https://wa.me/91${cleanPhone}?text=Hello%20${encodeURIComponent(c.name)},%20this%20is%20Fixowe%20Technical%20Services." target="_blank" class="action-btn btn-wa" style="flex:1; text-align:center; text-decoration:none;">WhatsApp Client</a>` : ''}
+            ${cleanPhone ? `<a href="tel:+91${cleanPhone}" class="action-btn btn-call">Call</a>` : ''}
+          </div>
+        </div>
+      `;
+    });
+
+    customersContainer.innerHTML = html;
+  }
+
   function initFirestoreListener() {
     purgeDemoFirestoreDocs();
     if (typeof db !== 'undefined' && db) {
@@ -600,7 +666,22 @@ document.addEventListener('DOMContentLoaded', () => {
   btnSyncLive.addEventListener('click', () => {
     initFirestoreListener();
     renderBookings();
+    renderCustomers();
   });
+
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.toLowerCase().trim();
+      renderBookings();
+    });
+  }
+
+  const searchCustomersInput = document.getElementById('search-customers-input');
+  if (searchCustomersInput) {
+    searchCustomersInput.addEventListener('input', () => {
+      renderCustomers();
+    });
+  }
 
   function escapeHtml(str) {
     return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -608,5 +689,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   checkAuthSession();
   renderBookings();
+  renderCustomers();
   renderTechnicians();
 });
