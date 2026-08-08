@@ -674,15 +674,15 @@
     <div class="auth-card" id="auth-card-box">
       <img src="assets/transparent-logo-fixowe.png" alt="Fixowe Logo" class="auth-brand" />
       <h2>Fixowe Admin Portal</h2>
-      <p>Enter Master Passcode to Access Dashboard</p>
+      <p>Sign in with Google to Access Operations Dashboard</p>
 
       <div class="security-badge-pill">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         <span>Google Cloud Admin Verification</span>
       </div>
 
-      <!-- Official Google Admin Sign-In Button -->
-      <button type="button" class="btn-google-admin-auth" id="btn-google-admin-auth">
+      <!-- Official Google Admin Sign-In Button (Pure Google Authentication) -->
+      <button type="button" class="btn-google-admin-auth" id="btn-google-admin-auth" style="margin-top: 10px;">
         <svg viewBox="0 0 24 24" width="20" height="20">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -691,25 +691,6 @@
         </svg>
         <span>Sign In with Google (Admin)</span>
       </button>
-
-      <div class="auth-divider" style="margin: 14px 0;">
-        <span>or email sign in</span>
-      </div>
-
-      <form id="admin-login-form">
-        <div class="form-group">
-          <label for="admin-email">Admin Email / Phone</label>
-          <input type="text" id="admin-email" class="form-control" placeholder="Enter admin email or phone" required autocomplete="username" />
-        </div>
-        <div class="form-group">
-          <label for="admin-pin">Master Passcode</label>
-          <div class="pass-input-wrapper">
-            <input type="password" id="admin-pin" class="form-control" placeholder="Enter secure passcode" required autocomplete="current-password" style="padding-right: 40px;" />
-            <button type="button" class="pass-toggle-btn" id="btn-toggle-pass" aria-label="Toggle password visibility">👁️</button>
-          </div>
-        </div>
-        <button type="submit" class="btn-primary" id="btn-submit-auth">Sign In to Dashboard</button>
-      </form>
 
       <div id="auth-error-msg" class="auth-error" style="margin-top: 14px; display: none;"></div>
     </div>
